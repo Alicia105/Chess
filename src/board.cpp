@@ -3,6 +3,7 @@
 #include <map>
 #include "board.hpp"
 #include "piece.hpp"
+#include "player.hpp"
 
 using namespace std;
 
@@ -124,4 +125,23 @@ void Board::initiateBoard(){
 
         }
     }
+}
+
+
+
+//to complete
+bool Board::isCaseUnderAttack(){
+
+    return false;
+}
+
+//bool Board::isKingUnderAttack
+
+void Board::playerTurn(Player player1,Player player2){
+    if(numberOfTurn==0){
+        if(player1.getColorPlayer()=="white"){
+            cout<<"You're the one to start;"
+        }
+    }
+
 }

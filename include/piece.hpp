@@ -38,8 +38,9 @@ class Piece{
     void setNumberOfMove(int num);
 
     //piece moves
-    bool isMoveLegal(vector<int> coordinates,string option);
+    bool isMoveLegal(std::vector<int> coordinates,std::string option);
     bool pawnMove(std::vector<int> coordinates);
+    void pawnPromotion();
     bool rookMove(std::vector<int> coordinates);
     bool knightMove(std::vector<int> coordinates);
     bool bishopMove(std::vector<int> coordinates);

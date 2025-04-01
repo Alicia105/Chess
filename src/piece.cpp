@@ -134,14 +134,13 @@ bool Piece::isMoveLegal(vector<int> coordinates,string option){
     return false;
 }
 
-//missing promotion option and check board boundaries
 bool Piece::pawnMove(vector<int> coordinates){
 
     //coordinates in C++: coordinates[0]=row,coordinates[1]=column;
 
     //stay on the board
     if(coordinatesOnBoard[0]+1<=7 or coordinatesOnBoard[0]-1>=0){
-        if(coordinatesOnBoard[0]+1<=7 or coordinatesOnBoard[0]-1>=0){
+        if(coordinatesOnBoard[1]+1<=7 or coordinatesOnBoard[1]-1>=0){
             if(colorPiece=="white"){
                 if(numberOfMove==0){
                     if(coordinates[0]==coordinatesOnBoard[0]-1 or coordinates[0]==coordinatesOnBoard[0]-2){
@@ -173,6 +172,62 @@ bool Piece::pawnMove(vector<int> coordinates){
     
     return false;
    
+}
+
+void Piece::pawnPromotion(){
+
+    //coordinates in C++: coordinates[0]=row,coordinates[1]=column;
+    if (namePiece=="pawn"){
+        int n;
+
+        if(colorPiece=="white"){
+
+            if(coordinatesOnBoard[0]==0){
+
+                cout<<"Your pawn can be promoted !\n"<<endl;
+                cout<<"Choose the type of piece you want to promote your pawn into :"<<endl;
+                cout<<"1.Rook"<<endl;
+                cout<<"2.Knight"<<endl;
+                cout<<"3.Bishop"<<endl;
+                cout<<"4.Queen"<<endl;
+                cin>>n;
+                cin.ignore();
+            }
+        }
+
+        if(colorPiece=="black"){
+            if(coordinatesOnBoard[0]==7){
+
+                cout<<"Your pawn can be promoted !\n"<<endl;
+                cout<<"Choose the type of piece you want to promote your pawn into :"<<endl;
+                cout<<"1.Rook"<<endl;
+                cout<<"2.Knight"<<endl;
+                cout<<"3.Bishop"<<endl;
+                cout<<"4.Queen"<<endl;
+                cin>>n;
+                cin.ignore();
+            }
+        }
+
+        switch(n){
+            case 1:
+                setNamePiece("rook");
+                break;
+            case 2:
+                setNamePiece("knight");
+                break;
+            case 3:
+                setNamePiece("bishop");
+                break;
+            case 4:
+                setNamePiece("queen");
+                break;
+            default:
+                break;
+        }
+
+    }
+    
 }
 
 bool Piece::rookMove(vector<int> coordinates){
@@ -303,7 +358,6 @@ bool Piece::queenMove(vector<int> coordinates){
 
 }
 
-//missing castling option
 bool Piece::kingMove(vector<int> coordinates){
 
     //stay on the board
@@ -349,6 +403,47 @@ bool Piece::kingMove(vector<int> coordinates){
     }
 
     return false;
-
 }
 
+//to modify
+void Piece::kingCastling(vector<int> coordKing,vector<int> coordRook1,vector<int> coordRook2,int selector){
+    int n;
+    if(selector==1){
+        string kingNewPosition;
+        string rookNewPosition;
+
+        cout<<"Your can do a castling move !\n"<<endl;
+        cout<<"Your king is in "<<coordKing<<".\n Your rook is in "<<coordRook1<<"."<<endl;
+        cout<<"Do you want to do a castling ?"<<endl;
+        cout<<"1.Yes"<<endl;
+        cout<<"2.No"<<endl;
+        cin>>n;
+
+        if(n==1){
+
+        }
+
+
+
+        
+        cout<<"3.Bishop"<<endl;
+        cout<<"4.Queen"<<endl;
+        cin>>n;
+        cin.ignore();
+            
+    } 
+    if(selector==2){
+        cout<<"Your can do a castling !\n"<<endl;
+        cout<<"Choose the type of piece you want to promote your pawn into :"<<endl;
+        cout<<"1.Rook"<<endl;
+        cout<<"2.Knight"<<endl;
+        cout<<"3.Bishop"<<endl;
+        cout<<"4.Queen"<<endl;
+        cin>>n;
+        cin.ignore();
+            
+    }
+    else{
+        return;
+    }
+}

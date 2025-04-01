@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include "piece.hpp"
+#include "player.hpp"
 
 class Board{
 
@@ -19,16 +20,23 @@ class Board{
 
     //geters
     std::vector<std::vector<std::string>> getBoard();
-    std::vector<int>getCase(string nameCaseInChess);//nameCaseInChess:name of the case in chess nomenclature 
+    std::vector<int>getCase(std::string nameCaseInChess);//nameCaseInChess:name of the case in chess nomenclature 
     std::map<std::string,Piece> getPiecesPostions();
 
 
     //setters
 
     //coordinates in C++: coordinates[0]=row,coordinates[1]column;
-    
     std::string setCase(vector<int> coordinates,string nameCaseInChess);//coordinates in C++,nameCaseInChess:name of the case in chess nomenclature-->name the case with nameInChess
     std::string generateNameCase(vector<int> coordinates);//coordinates in C++, return nameCaseInChess
     void initiateBoard();
+
+
+    bool isCaseUnderAttack();
+    //bool Board::isKingUnderAttack
+    void playerTurn(Player player1,Player player2);
+        
+    
+    
 };
 #endif
