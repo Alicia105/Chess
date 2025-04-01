@@ -11,6 +11,7 @@ class Board{
     private:
     std::vector<std::vector<std::string>> grid;//chess grid of 8x8, eac case contains a string representing the name of the case in traditional chess nomenclature
     std::map<std::string,Piece> piecesPostions;
+    int numberOfTurn;
 
     public :
     Board();

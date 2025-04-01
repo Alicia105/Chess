@@ -9,6 +9,7 @@ using namespace std;
 Board::Board(){
     grid=vector<vector<string>>(8,vector<string>(8));
     piecesPostions=map<string,Piece>();
+    numberOfTurn=0;
 }
 
 Board::~Board(){}
@@ -99,7 +100,7 @@ string Board::generateNameCase(vector<int> coordinates){
 
 void Board::initiateBoard(){
 
-    //coordinates in C++: coordinates[0]=row,coordinates[1]column;
+    //coordinates in C++: coordinates[0]=row,coordinates[1]=column;
 
     for(int i=0;i<grid.size();i++){
         for(int j=0;j<grid[i].size();j++){
@@ -109,14 +110,17 @@ void Board::initiateBoard(){
             coord[1]=j;
             string s=generateNameCase(coord);
 
-            //Piece
-            Piece p;
-            p.initiatePiece(coord);
-            p.setCasePiece(s);
-
             //Board
             grid[i][j]=s;
-            piecesPostions.insert(pair<string,Piece>(s,p));                  
+
+
+            if(i==0 or i==1 or i==6 or i==7){
+                //Piece
+                Piece p;
+                p.initiatePiece(coord);
+                p.setCasePiece(s);
+                piecesPostions.insert(pair<string,Piece>(s,p));
+            }                  
 
         }
     }
