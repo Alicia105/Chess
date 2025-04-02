@@ -13,7 +13,6 @@ class Piece{
     std::string casePiece;//caseNameInChess nomenclature
     std::vector<int> coordinatesOnBoard;
     int numberOfMove;
-
     bool isCaptured;
 
     public:
@@ -36,10 +35,12 @@ class Piece{
     void initiatePiece(std::vector<int> coordinates);
     void setCaseCoordinate(std::vector<int> coordinates);
     void setNumberOfMove(int num);
+    void wasMoved();
 
     //piece moves
-    bool isMoveLegal(std::vector<int> coordinates,std::string option);
+    bool isMoveLegal(std::vector<int> coordinates);
     bool pawnMove(std::vector<int> coordinates);
+    bool pawnCapture(vector<int> coordinates);
     void pawnPromotion();
     bool rookMove(std::vector<int> coordinates);
     bool knightMove(std::vector<int> coordinates);

@@ -32,7 +32,7 @@ vector<Piece> Player::getCapturedPieces(){
     return capturedPieces;
 }
 
-map<string,Piece> Player::getPlayerPiecesPostions(){
+map<string,Piece> Player::getPlayerPiecesPositions(){
     return playerPiecesPostions;
 }
 

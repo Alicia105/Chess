@@ -26,7 +26,7 @@ class Player
     
     std::vector<Piece> getCapturedPieces();
     
-    std::map<std::string,Piece> getPlayerPiecesPostions();
+    std::map<std::string,Piece> getPlayerPiecesPositions();
     
     int getNumberOfMove();    
 
@@ -35,11 +35,13 @@ class Player
     
     void setCapturedPieces();
     
-    void setPlayerPiecesPostions();
+    //void setPlayerPiecesPositions();
     
     void setNumberOfMove(int number);    
 
     void initiatePlayer(std::map<std::string,Piece> allPiecesPositionsOnBoard);
+
+    void updatePlayerPiecePosition();
     
     void playedAMove();
 

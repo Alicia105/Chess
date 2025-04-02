@@ -8,7 +8,7 @@ Piece::Piece(){
     colorPiece="";
     casePiece="";
     isCaptured=false;
-    coordinatesOnBoard=vector<int>();
+    coordinatesOnBoard=vector<int>(2);
     numberOfMove=0;
 }
 
@@ -102,9 +102,13 @@ void Piece::setNumberOfMove(int num){
     numberOfMove=num;
 }
 
+void Piece::wasMoved(){
+    numberOfMove+=1;
+}
+
 //piece moves
 
-bool Piece::isMoveLegal(vector<int> coordinates,string option){
+bool Piece::isMoveLegal(vector<int> coordinates){
 
     if(namePiece=="pawn"){
         return pawnMove(coordinates);
@@ -228,6 +232,39 @@ void Piece::pawnPromotion(){
 
     }
     
+}
+
+bool Piece::pawnCapture(vector<int> coordinates){
+    //stay on the board
+    if(coordinatesOnBoard[0]+1<=7 or coordinatesOnBoard[0]-1>=0){
+        if(coordinatesOnBoard[1]+1<=7 or coordinatesOnBoard[1]-1>=0){
+            if(colorPiece=="white"){
+                //top left
+                if(coordinates[0]==coordinatesOnBoard[0]-1 and coordinates[1]==coordinatesOnBoard[1]-1){
+                    return true;
+                }
+
+                //top right
+                if(coordinates[0]==coordinatesOnBoard[0]-1 and coordinates[1]==coordinatesOnBoard[1]+1){
+                    return true;
+                }
+                
+            }
+            if(colorPiece=="black"){
+                //bottom left
+                if(coordinates[0]==coordinatesOnBoard[0]+1 and coordinates[1]==coordinatesOnBoard[1]-1){
+                    return true;
+                }
+
+                //bottom right
+                if(coordinates[0]==coordinatesOnBoard[0]+1 and coordinates[1]==coordinatesOnBoard[1]+1){
+                    return true;
+                }   
+            }
+        }
+    }
+    
+    return false;
 }
 
 bool Piece::rookMove(vector<int> coordinates){
@@ -406,7 +443,7 @@ bool Piece::kingMove(vector<int> coordinates){
 }
 
 //to modify
-void Piece::kingCastling(vector<int> coordKing,vector<int> coordRook1,vector<int> coordRook2,int selector){
+/*void Piece::kingCastling(vector<int> coordKing,vector<int> coordRook1,vector<int> coordRook2,int selector){
     int n;
     if(selector==1){
         string kingNewPosition;
@@ -446,4 +483,4 @@ void Piece::kingCastling(vector<int> coordKing,vector<int> coordRook1,vector<int
     else{
         return;
     }
-}
+}*/
