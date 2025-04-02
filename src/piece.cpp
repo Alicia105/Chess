@@ -1,5 +1,7 @@
 #include <iostream>
-#include "piece.hpp"
+#include <string>
+#include <vector>
+#include "../include/piece.hpp"
 
 using namespace std;
 
@@ -15,35 +17,44 @@ Piece::Piece(){
 Piece::~Piece(){}
 
 //getters
+
+//good
 string Piece::getNamePiece(){
     return namePiece;
 }
 
+//good
 string Piece::getColorPiece(){
     return colorPiece;
 }
 
+//good
 string Piece::getCasePiece(){
     return casePiece;
 }
 
+//good
 vector<int> Piece::getCaseCoordinate(){
     return coordinatesOnBoard;
 }
 
+//good
 bool Piece::getIsCaptured(){
     return isCaptured;
 }
 
+//good
 int Piece::getNumberOfMove(){
     return numberOfMove;
 }
 
+
 //setters
+
 void Piece::setNamePiece(string namepiece){
     namePiece=namepiece;    
 }
-
+//good
 void Piece::setColorPiece(string colorpiece){
     colorPiece=colorpiece;
 }
@@ -56,44 +67,60 @@ void Piece::setIsCaptured(bool status){
     isCaptured=status;
 }
 
+//good
 void Piece::initiatePiece(vector<int> coordinates){
 
     //coordinates in C++: coordinates[0]=row,coordinates[1]column;
     int row=coordinates[0];
     int column=coordinates[1];
 
-    if(row==0 or row==1){
+    if(row==0 || row==1){
         setColorPiece("black");
         if(row==1){
             setNamePiece("pawn");
+            coordinatesOnBoard=coordinates;
+            return;
         }
     }
-    if(row==6 or row==7){
+    if(row==6 || row==7){
         setColorPiece("white");
         if(row==6){
             setNamePiece("pawn");
+            coordinatesOnBoard=coordinates;
+            return;
         }
     }
-    if(column==0 or column==7){
+    if(column==0 || column==7){
         setNamePiece("rook");
+        coordinatesOnBoard=coordinates;
+        return;
     }
-    if(column==1 or column==6){
+    if(column==1 || column==6){
+        coordinatesOnBoard=coordinates;
         setNamePiece("knight");
+        return;
     }
-    if(column==2 or column==5){
+    if(column==2 || column==5){
         setNamePiece("bishop");
+        coordinatesOnBoard=coordinates;
+        return;
     }
     if(column==3){
         setNamePiece("queen");
+        coordinatesOnBoard=coordinates;
+        return;
     }
     if(column==4){
         setNamePiece("king");
+        coordinatesOnBoard=coordinates;
+        return;
     }
     
-    coordinatesOnBoard=coordinates;
+    
 
 }
 
+//good
 void Piece::setCaseCoordinate(vector<int> coordinates){
     coordinatesOnBoard=coordinates;
 }
@@ -101,20 +128,23 @@ void Piece::setCaseCoordinate(vector<int> coordinates){
 void Piece::setNumberOfMove(int num){
     numberOfMove=num;
 }
-
+//good
 void Piece::wasMoved(){
     numberOfMove+=1;
 }
+
 
 //piece moves
 
 bool Piece::isMoveLegal(vector<int> coordinates){
 
     if(namePiece=="pawn"){
+        //good
         return pawnMove(coordinates);
     }
 
     if(namePiece=="rook"){
+        //good
         return rookMove(coordinates);
     }
 
@@ -138,16 +168,20 @@ bool Piece::isMoveLegal(vector<int> coordinates){
     return false;
 }
 
+//good
 bool Piece::pawnMove(vector<int> coordinates){
 
     //coordinates in C++: coordinates[0]=row,coordinates[1]=column;
 
     //stay on the board
-    if(coordinatesOnBoard[0]+1<=7 or coordinatesOnBoard[0]-1>=0){
-        if(coordinatesOnBoard[1]+1<=7 or coordinatesOnBoard[1]-1>=0){
+    if(coordinatesOnBoard[0]+1<=7 || coordinatesOnBoard[0]-1>=0){
+        if(coordinatesOnBoard[1]+1<=7 || coordinatesOnBoard[1]-1>=0){
+            if (coordinatesOnBoard[1]!=coordinates[1]) {
+                return false;
+            }
             if(colorPiece=="white"){
                 if(numberOfMove==0){
-                    if(coordinates[0]==coordinatesOnBoard[0]-1 or coordinates[0]==coordinatesOnBoard[0]-2){
+                    if(coordinates[0]==coordinatesOnBoard[0]-1 || coordinates[0]==coordinatesOnBoard[0]-2){
                         return true;
                     }
                 }
@@ -161,7 +195,7 @@ bool Piece::pawnMove(vector<int> coordinates){
         
             if(colorPiece=="black"){
                 if(numberOfMove==0){
-                    if(coordinates[0]==coordinatesOnBoard[0]+1 or coordinates[0]==coordinatesOnBoard[0]+2){
+                    if(coordinates[0]==coordinatesOnBoard[0]+1 || coordinates[0]==coordinatesOnBoard[0]+2){
                         return true;
                     }
                 }
@@ -178,6 +212,7 @@ bool Piece::pawnMove(vector<int> coordinates){
    
 }
 
+//good
 void Piece::pawnPromotion(){
 
     //coordinates in C++: coordinates[0]=row,coordinates[1]=column;
@@ -234,30 +269,31 @@ void Piece::pawnPromotion(){
     
 }
 
+//good
 bool Piece::pawnCapture(vector<int> coordinates){
     //stay on the board
-    if(coordinatesOnBoard[0]+1<=7 or coordinatesOnBoard[0]-1>=0){
-        if(coordinatesOnBoard[1]+1<=7 or coordinatesOnBoard[1]-1>=0){
+    if(coordinatesOnBoard[0]+1<=7 || coordinatesOnBoard[0]-1>=0){
+        if(coordinatesOnBoard[1]+1<=7 || coordinatesOnBoard[1]-1>=0){
             if(colorPiece=="white"){
                 //top left
-                if(coordinates[0]==coordinatesOnBoard[0]-1 and coordinates[1]==coordinatesOnBoard[1]-1){
+                if(coordinates[0]==coordinatesOnBoard[0]-1 && coordinates[1]==coordinatesOnBoard[1]-1){
                     return true;
                 }
 
                 //top right
-                if(coordinates[0]==coordinatesOnBoard[0]-1 and coordinates[1]==coordinatesOnBoard[1]+1){
+                if(coordinates[0]==coordinatesOnBoard[0]-1 && coordinates[1]==coordinatesOnBoard[1]+1){
                     return true;
                 }
                 
             }
             if(colorPiece=="black"){
                 //bottom left
-                if(coordinates[0]==coordinatesOnBoard[0]+1 and coordinates[1]==coordinatesOnBoard[1]-1){
+                if(coordinates[0]==coordinatesOnBoard[0]+1 && coordinates[1]==coordinatesOnBoard[1]-1){
                     return true;
                 }
 
                 //bottom right
-                if(coordinates[0]==coordinatesOnBoard[0]+1 and coordinates[1]==coordinatesOnBoard[1]+1){
+                if(coordinates[0]==coordinatesOnBoard[0]+1 && coordinates[1]==coordinatesOnBoard[1]+1){
                     return true;
                 }   
             }
@@ -267,21 +303,22 @@ bool Piece::pawnCapture(vector<int> coordinates){
     return false;
 }
 
+//good
 bool Piece::rookMove(vector<int> coordinates){
 
     for(int x=0;x<=7;x++){
         //coordinates in C++: coordinates[0]=row,coordinates[1]=column;
         
         //vertical move
-        if(coordinatesOnBoard[0]+x<=7 or coordinatesOnBoard[0]-x>=0){
-            if(coordinates[0]==coordinatesOnBoard[0]-x or coordinates[0]==coordinatesOnBoard[0]+x){
+        if(coordinatesOnBoard[0]+x<=7 || coordinatesOnBoard[0]-x>=0){
+            if(coordinates[0]==coordinatesOnBoard[0]-x || coordinates[0]==coordinatesOnBoard[0]+x){
                  return true;
             }
         }
         
         //horizontal move
-        if(coordinatesOnBoard[1]+x<=7 or coordinatesOnBoard[1]-x>=0){
-            if(coordinates[1]==coordinatesOnBoard[1]-x or coordinates[1]==coordinatesOnBoard[1]+x){
+        if(coordinatesOnBoard[1]+x<=7 || coordinatesOnBoard[1]-x>=0){
+            if(coordinates[1]==coordinatesOnBoard[1]-x || coordinates[1]==coordinatesOnBoard[1]+x){
                     return true;
             }
         }
@@ -291,50 +328,58 @@ bool Piece::rookMove(vector<int> coordinates){
     
 }
 
+//good
 bool Piece::knightMove(vector<int> coordinates){
 
-    if (coordinatesOnBoard[0]+2<=7 or coordinatesOnBoard[0]-2>=0){
-        if(coordinates[1]==coordinatesOnBoard[1]-1 or coordinates[1]==coordinatesOnBoard[1]+1){
+    // Define possible knight moves
+    vector<pair<int, int>> moves = {
+        {-2, -1}, {-2, 1}, {2, -1}, {2, 1},
+        {-1, -2}, {-1, 2}, {1, -2}, {1, 2}, 
+    };
+
+    // Iterate through possible moves
+    for (auto move : moves) {
+        int newX = coordinatesOnBoard[0] + move.first;
+        int newY = coordinatesOnBoard[1] + move.second;
+
+        // If the new coordinates match the given move, return true
+        if (coordinates[0] == newX && coordinates[1] == newY) {
             return true;
         }
     }
-    
-    if (coordinatesOnBoard[1]+2<=7 or coordinatesOnBoard[1]-2>=0){
-        if(coordinates[0]==coordinatesOnBoard[0]-1 or coordinates[0]==coordinatesOnBoard[0]+1){
-            return true;
-        }
-    }
+
     return false;
 }
 
+//good
 bool Piece::bishopMove(vector<int> coordinates){
 
     for(int x=0;x<=7;x++){
         //coordinates in C++: coordinates[0]=row,coordinates[1]=column;
         
         //stay on the board
-        if(coordinatesOnBoard[0]+x<=7 or coordinatesOnBoard[0]-x>=0){
-            if(coordinatesOnBoard[1]+x<=7 or coordinatesOnBoard[1]-x>=0){
+        if(coordinatesOnBoard[0]+x<=7 || coordinatesOnBoard[0]-x>=0){
+            if(coordinatesOnBoard[1]+x<=7 || coordinatesOnBoard[1]-x>=0){
 
                 //diagonal moves
 
                 //upper left diagonal
-                if(coordinates[0]==coordinatesOnBoard[0]-x and coordinates[1]==coordinatesOnBoard[1]-x){
+                if(coordinates[0]==coordinatesOnBoard[0]-x && coordinates[1]==coordinatesOnBoard[1]-x){
                     return true;
                 }
 
                 //upper right diagonal
-                if(coordinates[0]==coordinatesOnBoard[0]-x and coordinates[1]==coordinatesOnBoard[1]+x){
+                if(coordinates[0]==coordinatesOnBoard[0]-x && coordinates[1]==coordinatesOnBoard[1]+x){
                     return true;
                 }
 
                 //bottom left diagonal
-                if(coordinates[0]==coordinatesOnBoard[0]+x and coordinates[1]==coordinatesOnBoard[1]-x){
+                if(coordinates[0]==coordinatesOnBoard[0]+x && coordinates[1]==coordinatesOnBoard[1]-x){
                     return true;
                 }
 
                 //bottom right diagonal
-                if(coordinates[0]==coordinatesOnBoard[0]+x and coordinates[1]==coordinatesOnBoard[1]+x){
+                if(coordinates[0]==coordinatesOnBoard[0]+x && coordinates[1]==coordinatesOnBoard[1]+x){
                     return true;
                 }
             }
@@ -344,102 +389,90 @@ bool Piece::bishopMove(vector<int> coordinates){
     return false;     
 }
 
+//good
 bool Piece::queenMove(vector<int> coordinates){
-    for(int x=0;x<=7;x++){
+    for(int x=1;x<=7;x++){
         //coordinates in C++: coordinates[0]=row,coordinates[1]=column;
         
         //stay on the board
-        if(coordinatesOnBoard[0]+x<=7 or coordinatesOnBoard[0]-x>=0){
-            if(coordinatesOnBoard[1]+x<=7 or coordinatesOnBoard[1]-x>=0){
+        
+        //diagonal moves
 
-                //diagonal moves
+        //upper left diagonal
+        if(coordinates[0]==coordinatesOnBoard[0]-x && coordinates[1]==coordinatesOnBoard[1]-x){
+            return true;
+        }
 
-                //upper left diagonal
-                if(coordinates[0]==coordinatesOnBoard[0]-x and coordinates[1]==coordinatesOnBoard[1]-x){
-                    return true;
-                }
+        //upper right diagonal
+        if(coordinates[0]==coordinatesOnBoard[0]-x && coordinates[1]==coordinatesOnBoard[1]+x){
+            return true;
+        }
 
-                //upper right diagonal
-                if(coordinates[0]==coordinatesOnBoard[0]-x and coordinates[1]==coordinatesOnBoard[1]+x){
-                    return true;
-                }
+        //bottom left diagonal
+        if(coordinates[0]==coordinatesOnBoard[0]+x && coordinates[1]==coordinatesOnBoard[1]-x){
+            return true;
+        }
 
-                //bottom left diagonal
-                if(coordinates[0]==coordinatesOnBoard[0]+x and coordinates[1]==coordinatesOnBoard[1]-x){
-                    return true;
-                }
+        //bottom right diagonal
+        if(coordinates[0]==coordinatesOnBoard[0]+x && coordinates[1]==coordinatesOnBoard[1]+x){
+            return true;
+        }
 
-                //bottom right diagonal
-                if(coordinates[0]==coordinatesOnBoard[0]+x and coordinates[1]==coordinatesOnBoard[1]+x){
-                    return true;
-                }
-
-                //vertical move
-                if(coordinatesOnBoard[0]+x<=7 or coordinatesOnBoard[0]-x>=0){
-                    if(coordinates[0]==coordinatesOnBoard[0]-x or coordinates[0]==coordinatesOnBoard[0]+x){
-                        return true;
-                    }
-                }
+        //vertical move      
+        if((coordinates[0]==coordinatesOnBoard[0]-x || coordinates[0]==coordinatesOnBoard[0]+x) && coordinates[1]==coordinatesOnBoard[1]){
+            return true;
+        }
                 
-                //horizontal move
-                if(coordinatesOnBoard[1]+x<=7 or coordinatesOnBoard[1]-x>=0){
-                    if(coordinates[1]==coordinatesOnBoard[1]-x or coordinates[1]==coordinatesOnBoard[1]+x){
-                            return true;
-                    }
-                }
-            }
+                
+        //horizontal move
+        if((coordinates[1]==coordinatesOnBoard[1]-x || coordinates[1]==coordinatesOnBoard[1]+x) && coordinates[0]==coordinatesOnBoard[0]){
+            return true;
         }
     }
-    
-    return false;     
+    return false; 
 
 }
 
+//good
 bool Piece::kingMove(vector<int> coordinates){
 
-    //stay on the board
-    if(coordinatesOnBoard[0]+1<=7 or coordinatesOnBoard[0]-1>=0){
-        if(coordinatesOnBoard[1]+1<=7 or coordinatesOnBoard[1]-1>=0){
+    //coordinates in C++: coordinates[0]=row,coordinates[1]=column;
+        
+        //stay on the board
+        
+        //diagonal moves
 
-            //diagonal moves
-
-            //upper left diagonal
-            if(coordinates[0]==coordinatesOnBoard[0]-1 and coordinates[1]==coordinatesOnBoard[1]-1){
-                return true;
-            }
-
-            //upper right diagonal
-            if(coordinates[0]==coordinatesOnBoard[0]-1 and coordinates[1]==coordinatesOnBoard[1]+1){
-                return true;
-            }
-
-            //bottom left diagonal
-            if(coordinates[0]==coordinatesOnBoard[0]+1 and coordinates[1]==coordinatesOnBoard[1]-1){
-                return true;
-            }
-
-            //bottom right diagonal
-            if(coordinates[0]==coordinatesOnBoard[0]+1 and coordinates[1]==coordinatesOnBoard[1]+1){
-                return true;
-            }
-
-            //vertical move
-            if(coordinatesOnBoard[0]+1<=7 or coordinatesOnBoard[0]-1>=0){
-                if(coordinates[0]==coordinatesOnBoard[0]-1 or coordinates[0]==coordinatesOnBoard[0]+1){
-                    return true;
-                }
-            }
-            
-            //horizontal move
-            if(coordinatesOnBoard[1]+1<=7 or coordinatesOnBoard[1]-1>=0){
-                if(coordinates[1]==coordinatesOnBoard[1]-1 or coordinates[1]==coordinatesOnBoard[1]+1){
-                        return true;
-                }
-            }
+        //upper left diagonal
+        if(coordinates[0]==coordinatesOnBoard[0]-1 && coordinates[1]==coordinatesOnBoard[1]-1){
+            return true;
         }
-    }
 
-    return false;
+        //upper right diagonal
+        if(coordinates[0]==coordinatesOnBoard[0]-1 && coordinates[1]==coordinatesOnBoard[1]+1){
+            return true;
+        }
+
+        //bottom left diagonal
+        if(coordinates[0]==coordinatesOnBoard[0]+1 && coordinates[1]==coordinatesOnBoard[1]-1){
+            return true;
+        }
+
+        //bottom right diagonal
+        if(coordinates[0]==coordinatesOnBoard[0]+1 && coordinates[1]==coordinatesOnBoard[1]+1){
+            return true;
+        }
+
+        //vertical move      
+        if((coordinates[0]==coordinatesOnBoard[0]-1 || coordinates[0]==coordinatesOnBoard[0]+1) && coordinates[1]==coordinatesOnBoard[1]){
+            return true;
+        }
+                
+                
+        //horizontal move
+        if((coordinates[1]==coordinatesOnBoard[1]-1 || coordinates[1]==coordinatesOnBoard[1]+1) && coordinates[0]==coordinatesOnBoard[0]){
+            return true;
+        }
+    return false; 
 }
 
 //to modify
@@ -484,3 +517,26 @@ bool Piece::kingMove(vector<int> coordinates){
         return;
     }
 }*/
+
+/*int main(){
+    vector<int> v(2);
+    v[0]=7;
+    v[1]=4;
+    Piece p;
+    p.initiatePiece(v);
+   
+    cout<<"name :"<<p.getNamePiece()<<endl;
+    cout<<"color :"<<p.getColorPiece()<<endl;
+   
+    vector<int> z(2);
+    z[0]=4;
+    z[1]=3;
+    p.setCaseCoordinate(z);
+
+    vector<int> o(2);
+    o[0]=4;
+    o[1]=4;
+
+    cout<<p.kingMove(o)<<endl;
+}*/
+
