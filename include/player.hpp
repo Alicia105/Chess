@@ -4,7 +4,6 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include "board.hpp"
 #include "piece.hpp"
 
 class Player
@@ -17,33 +16,29 @@ class Player
 
     public:
 
-    Player();
-    Player(std::string colorplayer);
-    ~Player();
+    Player();//good
+    Player(std::string colorplayer);//good
+    ~Player();//good
 
     //getters
-    std::string getColorPlayer();
+    std::string getColorPlayer();//good
     
-    std::vector<Piece> getCapturedPieces();
+    std::vector<Piece>& getCapturedPieces();//good-> return the reference to the variable instead of a tempoary copy 
     
-    std::map<std::string,Piece> getPlayerPiecesPositions();
+    std::map<std::string,Piece>& getPlayerPiecesPositions();//good-> return the reference to the variable instead of a tempoary copy 
     
-    int getNumberOfMove();    
+    int getNumberOfMove();//good
 
     //setters
-    void setColorPlayer(std::string colorplayer);
+    void setColorPlayer(std::string color);//good
     
-    void setCapturedPieces();
+    void setCapturedPiece(Piece p);//good
     
-    //void setPlayerPiecesPositions();
-    
-    void setNumberOfMove(int number);    
+    void setNumberOfMove(int number);//good   
 
-    void initiatePlayer(std::map<std::string,Piece> allPiecesPositionsOnBoard);
-
-    void updatePlayerPiecePosition();
+    void initiatePlayer(std::map<std::string,Piece> allPiecesPositionsOnBoard);//good
     
-    void playedAMove();
+    void playedAMove();//good
 
 };
 

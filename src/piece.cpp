@@ -5,6 +5,7 @@
 
 using namespace std;
 
+//good
 Piece::Piece(){
     namePiece="";
     colorPiece="";
@@ -14,6 +15,7 @@ Piece::Piece(){
     numberOfMove=0;
 }
 
+//good
 Piece::~Piece(){}
 
 //getters
@@ -58,11 +60,11 @@ void Piece::setNamePiece(string namepiece){
 void Piece::setColorPiece(string colorpiece){
     colorPiece=colorpiece;
 }
-
+//good
 void Piece::setCasePiece(string casepiece){
     casePiece=casepiece;
 }
-
+//good
 void Piece::setIsCaptured(bool status){
     isCaptured=status;
 }
@@ -116,8 +118,11 @@ void Piece::initiatePiece(vector<int> coordinates){
         return;
     }
     
-    
-
+    else{
+        setNamePiece("Unknown");
+        coordinatesOnBoard=coordinates;
+        return;
+    }
 }
 
 //good
@@ -136,6 +141,7 @@ void Piece::wasMoved(){
 
 //piece moves
 
+//good
 bool Piece::isMoveLegal(vector<int> coordinates){
 
     if(namePiece=="pawn"){
@@ -149,19 +155,22 @@ bool Piece::isMoveLegal(vector<int> coordinates){
     }
 
     if(namePiece=="knight"){
+        //good
         return knightMove(coordinates);
     }
 
     if(namePiece=="bishop"){
-
+        //good
         return bishopMove(coordinates);
     }
 
     if(namePiece=="queen"){
+        //good
         return queenMove(coordinates);
     }
 
     if(namePiece=="king"){
+        //good
         return kingMove(coordinates);
     }
 
@@ -527,6 +536,16 @@ bool Piece::kingMove(vector<int> coordinates){
    
     cout<<"name :"<<p.getNamePiece()<<endl;
     cout<<"color :"<<p.getColorPiece()<<endl;
+
+    Piece r=p;
+    cout<<"name :"<<r.getNamePiece()<<endl;
+    r.setNamePiece("Hello !");
+    cout<<"new name :"<<r.getNamePiece()<<endl;
+    cout<<"p name :"<<p.getNamePiece()<<endl;
+    cout<<"color :"<<r.getColorPiece()<<endl;
+    cout<<"row :"<<r.getCaseCoordinate()[0]<<endl;
+    cout<<"column :"<<r.getCaseCoordinate()[1]<<endl;
+    
    
     vector<int> z(2);
     z[0]=4;

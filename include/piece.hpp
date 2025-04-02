@@ -16,8 +16,8 @@ class Piece{
     bool isCaptured;
 
     public:
-    Piece();
-    ~Piece();
+    Piece();//good
+    ~Piece();//good
 
     //getters
 
@@ -41,7 +41,7 @@ class Piece{
 
     //piece moves
     
-    bool isMoveLegal(std::vector<int> coordinates);
+    bool isMoveLegal(std::vector<int> coordinates);//good
     bool pawnMove(std::vector<int> coordinates);//good
     bool pawnCapture(std::vector<int> coordinates);//good
     void pawnPromotion();//good
