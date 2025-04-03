@@ -3,9 +3,9 @@
 #include <map>
 #include <cstring>
 #include <string>
-#include "board.hpp"
-#include "piece.hpp"
-#include "player.hpp"
+#include "../include/board.hpp"
+#include "../include/piece.hpp"
+#include "../include/player.hpp"
 
 using namespace std;
 
@@ -18,6 +18,8 @@ Board::Board(){
 Board::~Board(){}
 
 //getters
+
+//good
 vector<vector<string>> Board::getBoard(){
     return grid;
 }
@@ -42,13 +44,14 @@ vector<int> Board::getCase(string nameCase){
 
 }
 
-map<string,Piece> Board::getPiecesPositions(){
+map<string,Piece>& Board::getPiecesPositions(){
     return piecesPositions;
 }
 
 //setters
 
-string Board::setCase(vector<int> coordinates,string nameCase){
+//good
+void Board::setCase(vector<int> coordinates,string nameCase){
 
     //coordinates in C++: coordinates[0]=row,coordinates[1]=column;
     int row=coordinates[0];
@@ -57,6 +60,7 @@ string Board::setCase(vector<int> coordinates,string nameCase){
     grid[row][column]=nameCase;
 }
 
+//good
 string Board::generateNameCase(vector<int> coordinates){
 
     //coordinates in C++: coordinates[0]=row,coordinates[1]=column;    
@@ -96,18 +100,19 @@ string Board::generateNameCase(vector<int> coordinates){
 
     int numRow=-i+8;
     
-    string nameCase=column+to_string(numRow);
+    string nameCase=string(1,column)+to_string(numRow);
 
     return nameCase;
 }
 
+//good
 vector<int> Board::generateCaseCoordinates(string nameCaseInChess){
 
     //coordinates in C++: coordinates[0]=row,coordinates[1]=column;
     char c=tolower(nameCaseInChess[0]);
     char r=nameCaseInChess[1];
     
-    vector<int> coord;
+    vector<int> coord(2);
 
     int column;
     int convertRow=stoi(string(1,r));;
@@ -126,16 +131,16 @@ vector<int> Board::generateCaseCoordinates(string nameCaseInChess){
             column=3;
             break;
         case 'e':
-            column=5;
+            column=4;
             break;
         case 'f':
-            column=6;
+            column=5;
             break;
         case 'g':
-            column=7;
+            column=6;
             break;
         case 'h':
-            column=8;
+            column=7;
             break;
         default:
             break;
@@ -149,6 +154,7 @@ vector<int> Board::generateCaseCoordinates(string nameCaseInChess){
     return coord;
 }
 
+//good
 void Board::initiateBoard(){
 
     //coordinates in C++: coordinates[0]=row,coordinates[1]=column;
@@ -178,10 +184,10 @@ void Board::initiateBoard(){
 }
 
 //vizualisation
-
+//good
 void Board::printBoard(){
     //print header
-    cout<<"a b c d e f g h"<<endl;
+    cout<<"X a b c d e f g h"<<endl;
     for(int i=0; i<grid.size();i++){
 
         //print column name
@@ -200,11 +206,23 @@ void Board::printBoard(){
                 string colorPiece=piecesPositions.at(nameCase).getColorPiece();
 
                 if(colorPiece=="black"){
-                    char currentPiece = toupper(namePiece[0]);
-                    line += currentPiece;
+                    if(namePiece=="knight"){
+                        char currentPiece = toupper('n');
+                        line += currentPiece;
+                    }
+                    else{
+                        char currentPiece = toupper(namePiece[0]);
+                        line += currentPiece;
+                    }
                 }
                 else{
-                    line += namePiece[0];
+                    if(namePiece=="knight"){
+                        line +='n';
+                    }
+                    else{
+                        line += namePiece[0];
+                    }
+                    
                 }
                
             }
@@ -219,6 +237,7 @@ void Board::printBoard(){
 }
 
 //for game logic
+//good
 bool Board::isCaseOccupied(vector<int> coordinates){
     //coordinates in C++: coordinates[0]=row,coordinates[1]=column;    
     int row=coordinates[0];
@@ -229,10 +248,96 @@ bool Board::isCaseOccupied(vector<int> coordinates){
     return piecesPositions.count(nameCase);
 }
 
+
+/*int main(){
+
+    Board b;
+    b.initiateBoard();
+    cout<<"row :"<<b.getBoard().size()<<endl;
+    cout<<"column : "<<b.getBoard()[0].size()<<endl;
+    b.printBoard();
+
+    Player p1("white");
+    Player p2("black");
+
+    p1.initiatePlayer(b.getPiecesPositions());
+    p2.initiatePlayer(b.getPiecesPositions());
+
+    vector<int> v(2);//case a6
+    v[0]=4;
+    v[1]=0;
+    
+    cout<<"is case occupied :"<<b.isCaseOccupied(v)<<endl;
+    cout<<"case name :"<<b.getPiecesPositions().at("a7").getNamePiece()<<endl;
+    b.getPiecesPositions().at("a7").setNamePiece("Yo");
+    cout<<"new case name :"<<b.getPiecesPositions().at("a7").getNamePiece()<<endl;
+
+}*/
+    //initialisation "board"
+    /*vector<int> v(2);//case a6
+    v[0]=6;
+    v[1]=0;
+
+    vector<int> w(2);//c7
+    w[0]=7;
+    w[1]=2;
+
+    vector<int> x(2);//e4
+    x[0]=0;
+    x[1]=4;
+
+    vector<int> y(2);//e4
+    y[0]=0;
+    y[1]=7;
+
+    map<string,Piece> allPiecesPositionsOnBoard;//simulate board
+    
+    //white pieces
+    Piece a;
+    a.initiatePiece(v); //pawn
+    cout<<a.getNamePiece()<<endl;
+    allPiecesPositionsOnBoard.insert(pair<string,Piece>("a6",a));
+
+    Piece b;
+    b.initiatePiece(w); //bishop
+    cout<<b.getNamePiece()<<endl;
+    allPiecesPositionsOnBoard.insert(pair<string,Piece>("c7",b));
+
+    //black piece
+    Piece p;
+    p.initiatePiece(x); //king
+    cout<<p.getNamePiece()<<endl;
+    allPiecesPositionsOnBoard.insert(pair<string,Piece>("e4",p));
+
+    Piece r;
+    r.initiatePiece(y); //rook
+    cout<<r.getNamePiece()<<endl;
+   
+    Player pl("white");
+    pl.initiatePlayer(allPiecesPositionsOnBoard);
+    cout<<"number of pieces : "<<pl.getPlayerPiecesPositions().size()<<endl;
+    cout<<pl.getPlayerPiecesPositions().count("a6")<<endl;
+    cout<<"name of piece a6: "<<pl.getPlayerPiecesPositions().at("a6").getNamePiece()<<endl;
+    pl.getPlayerPiecesPositions().at("a6").setNamePiece("YOLO !");
+    cout<<"new name of piece a6: "<<pl.getPlayerPiecesPositions().at("a6").getNamePiece()<<endl;
+
+
+    cout<<"size : "<<pl.getCapturedPieces().size()<<endl;
+    pl.setCapturedPiece(p);
+    pl.setCapturedPiece(r);
+    cout<<"new size : "<<pl.getCapturedPieces().size()<<endl;
+    
+    cout<<"first captured piece : "<<pl.getCapturedPieces()[0].getNamePiece()<<endl;
+    cout<<"second captured piece : "<<pl.getCapturedPieces()[1].getNamePiece()<<endl;
+    pl.getCapturedPieces()[0].setNamePiece("Yo");
+    cout<<"new name first captured piece : "<<pl.getCapturedPieces()[0].getNamePiece()<<endl;*/
+
+//}
+
 //to complete
 //bool Board::isCaseUnderAttack
 //bool Board::isKingUnderAttack
-
+/*
 int Board::gameLogic(Player player1,Player player2){
     int n=0;
     if(numberOfTurn==0){
@@ -300,7 +405,7 @@ int Board::makeAMove(Player currentPlayer,Player adverser){
         }
     }
     else the turn is a classic one;
-    */
+    
 
     //choose piece to move
     string startPosition;
@@ -410,4 +515,4 @@ int Board::playerExit(){
         return 0;
     }
     return x;
-}
+}*/

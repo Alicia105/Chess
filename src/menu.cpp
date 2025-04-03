@@ -12,6 +12,9 @@ void printWelcome(){
 void printRules(){
     cout<<"You are going to play 2D Chess game."<<endl;
     cout<<"You can exit at the end of each turn."<<endl;
+    cout<<"Each piece is represented by the first later of its name (except for knights that are indicated by n)."<<endl;
+    cout<<"Their position is named by a later from a to h for the column and a number from 8 to 1 for the row (e.g a6)"<<endl;
+    cout<<""<<endl;
     //cout<<"You can also choose to save the current board to resume later."<<endl;
     cout<<"May the best win !"<<endl;
 

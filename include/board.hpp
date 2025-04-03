@@ -19,24 +19,24 @@ class Board{
     ~Board();
 
     //geters
-    std::vector<std::vector<std::string>> getBoard();
-    std::vector<int>getCase(std::string nameCaseInChess);//nameCaseInChess:name of the case in chess nomenclature 
-    std::map<std::string,Piece> getPiecesPositions();
+    std::vector<std::vector<std::string>> getBoard();//good
+    std::vector<int> getCase(std::string nameCaseInChess);//nameCaseInChess:name of the case in chess nomenclature 
+    std::map<std::string,Piece>& getPiecesPositions();//good
 
 
     //setters
 
     //coordinates in C++: coordinates[0]=row,coordinates[1]column;
-    std::string setCase(vector<int> coordinates,string nameCaseInChess);//coordinates in C++,nameCaseInChess:name of the case in chess nomenclature-->name the case with nameInChess
-    std::string generateNameCase(vector<int> coordinates);//coordinates in C++, return nameCaseInChess
-    std::vector<int> generateCaseCoordinates(std::string nameCaseInChess);
-    void initiateBoard();
+    void setCase(std::vector<int> coordinates,std::string nameCaseInChess);//good ->coordinates in C++,nameCaseInChess:name of the case in chess nomenclature-->name the case with nameInChess
+    std::string generateNameCase(std::vector<int> coordinates);//good ->coordinates in C++, return nameCaseInChess
+    std::vector<int> generateCaseCoordinates(std::string nameCaseInChess);//good
+    void initiateBoard();//good
     
     //visualization
-    void printBoard();
+    void printBoard();//good
 
     //for game logic
-    bool isCaseOccupied(vector<int> coordinates);
+    bool isCaseOccupied(std::vector<int> coordinates);//good
 
 
     //bool isCaseUnderAttack();
@@ -48,4 +48,5 @@ class Board{
     int playerExit();
     
 };
+
 #endif

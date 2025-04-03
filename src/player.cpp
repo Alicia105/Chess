@@ -53,8 +53,10 @@ int Player::getNumberOfMove(){
 //recheck--> need for a copy constructor
 void Player::initiatePlayer(std::map<std::string,Piece> allPiecesPositionsOnBoard){
     for(auto piece : allPiecesPositionsOnBoard){
+        //cout << "Checking piece at: " << piece.first << endl;
         if(piece.second.getColorPiece()==colorPlayer){
             Piece p=piece.second;//be carefull !
+            //cout << "Adding " << piece.first << " to player pieces" << endl;
             playerPiecesPostions.insert(pair<string,Piece>(piece.first,p));
         }
         //for tests
@@ -84,7 +86,7 @@ void Player::playedAMove(){
     numberOfMove+=1;
 }
 
-int main(){
+/*int main(){
     
     //initialisation "board"
     vector<int> v(2);//case a6
@@ -135,7 +137,7 @@ int main(){
     cout<<"new name of piece a6: "<<pl.getPlayerPiecesPositions().at("a6").getNamePiece()<<endl;
 
 
-    /*cout<<"size : "<<pl.getCapturedPieces().size()<<endl;
+    cout<<"size : "<<pl.getCapturedPieces().size()<<endl;
     pl.setCapturedPiece(p);
     pl.setCapturedPiece(r);
     cout<<"new size : "<<pl.getCapturedPieces().size()<<endl;
@@ -143,6 +145,6 @@ int main(){
     cout<<"first captured piece : "<<pl.getCapturedPieces()[0].getNamePiece()<<endl;
     cout<<"second captured piece : "<<pl.getCapturedPieces()[1].getNamePiece()<<endl;
     pl.getCapturedPieces()[0].setNamePiece("Yo");
-    cout<<"new name first captured piece : "<<pl.getCapturedPieces()[0].getNamePiece()<<endl;*/
+    cout<<"new name first captured piece : "<<pl.getCapturedPieces()[0].getNamePiece()<<endl;
 
-}
+}*/
