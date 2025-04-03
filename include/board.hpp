@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <algorithm>
+#include <cctype>
 #include "piece.hpp"
 #include "player.hpp"
 
@@ -22,6 +24,7 @@ class Board{
     std::vector<std::vector<std::string>> getBoard();//good
     std::vector<int> getCase(std::string nameCaseInChess);//nameCaseInChess:name of the case in chess nomenclature 
     std::map<std::string,Piece>& getPiecesPositions();//good
+    int getNumberOfTurn();//good
 
 
     //setters
@@ -37,15 +40,17 @@ class Board{
 
     //for game logic
     bool isCaseOccupied(std::vector<int> coordinates);//good
+    bool isPathClear(std::string startPosition,std::string endPosition);//good
 
 
     //bool isCaseUnderAttack();
     //bool Board::isKingUnderAttack
-    void playerTurn(Player player1,Player player2);
-    int  gameLogic(Player player1,Player player2);
-    void playerTurn(Player player);
-    int makeAMove(Player currentPlayer,Player adverser);
+    int  gameLogic(Player player1,Player player2);//good
+    void playerTurn(Player player1,Player player2);//good
+    int makeAMove(Player currentPlayer,Player adverser);//good
     int playerExit();
+    bool checkIfCorrectMoveInput(std::string moveInput);//good
+    std::string processMoveInput(std::string moveInput);//good
     
 };
 

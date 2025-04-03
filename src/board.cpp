@@ -3,6 +3,8 @@
 #include <map>
 #include <cstring>
 #include <string>
+#include <algorithm>
+#include <cctype>
 #include "../include/board.hpp"
 #include "../include/piece.hpp"
 #include "../include/player.hpp"
@@ -24,6 +26,7 @@ vector<vector<string>> Board::getBoard(){
     return grid;
 }
 
+//good
 vector<int> Board::getCase(string nameCase){
 
     //coordinates in C++: coordinates[0]=row,coordinates[1]column;
@@ -44,8 +47,14 @@ vector<int> Board::getCase(string nameCase){
 
 }
 
+//good
 map<string,Piece>& Board::getPiecesPositions(){
     return piecesPositions;
+}
+
+//good
+int Board::getNumberOfTurn(){
+    return numberOfTurn;
 }
 
 //setters
@@ -248,96 +257,61 @@ bool Board::isCaseOccupied(vector<int> coordinates){
     return piecesPositions.count(nameCase);
 }
 
+//good
+bool Board::isPathClear(string startPosition, string endPosition){
+    vector<int> startCoord = generateCaseCoordinates(startPosition);
+    vector<int> endCoord = generateCaseCoordinates(endPosition);
 
-/*int main(){
+    int startRow = startCoord[0];
+    int startCol = startCoord[1];
 
-    Board b;
-    b.initiateBoard();
-    cout<<"row :"<<b.getBoard().size()<<endl;
-    cout<<"column : "<<b.getBoard()[0].size()<<endl;
-    b.printBoard();
+    int endRow = endCoord[0];
+    int endCol = endCoord[1];
 
-    Player p1("white");
-    Player p2("black");
+    int rowStep, colStep;
 
-    p1.initiatePlayer(b.getPiecesPositions());
-    p2.initiatePlayer(b.getPiecesPositions());
+    // Determine row direction
+    if (endRow > startRow) {
+        rowStep = 1;
+    } else if (endRow < startRow) {
+        rowStep = -1;
+    } else {
+        rowStep = 0;
+    }
 
-    vector<int> v(2);//case a6
-    v[0]=4;
-    v[1]=0;
-    
-    cout<<"is case occupied :"<<b.isCaseOccupied(v)<<endl;
-    cout<<"case name :"<<b.getPiecesPositions().at("a7").getNamePiece()<<endl;
-    b.getPiecesPositions().at("a7").setNamePiece("Yo");
-    cout<<"new case name :"<<b.getPiecesPositions().at("a7").getNamePiece()<<endl;
+    // Determine column direction
+    if (endCol > startCol) {
+        colStep = 1;
+    } else if (endCol < startCol) {
+        colStep = -1;
+    } else {
+        colStep = 0;
+    }
 
-}*/
-    //initialisation "board"
-    /*vector<int> v(2);//case a6
-    v[0]=6;
-    v[1]=0;
+    int currentRow = startRow + rowStep;
+    int currentCol = startCol + colStep;
 
-    vector<int> w(2);//c7
-    w[0]=7;
-    w[1]=2;
+    while (currentRow != endRow || currentCol != endCol) {
 
-    vector<int> x(2);//e4
-    x[0]=0;
-    x[1]=4;
+        vector<int> coordinates={currentRow, currentCol};
+        string position = generateNameCase(coordinates);
 
-    vector<int> y(2);//e4
-    y[0]=0;
-    y[1]=7;
+        if (piecesPositions.count(position) > 0) {
+            return false; // Path is blocked
+        }
 
-    map<string,Piece> allPiecesPositionsOnBoard;//simulate board
-    
-    //white pieces
-    Piece a;
-    a.initiatePiece(v); //pawn
-    cout<<a.getNamePiece()<<endl;
-    allPiecesPositionsOnBoard.insert(pair<string,Piece>("a6",a));
+        currentRow += rowStep;
+        currentCol += colStep;
+    }
 
-    Piece b;
-    b.initiatePiece(w); //bishop
-    cout<<b.getNamePiece()<<endl;
-    allPiecesPositionsOnBoard.insert(pair<string,Piece>("c7",b));
-
-    //black piece
-    Piece p;
-    p.initiatePiece(x); //king
-    cout<<p.getNamePiece()<<endl;
-    allPiecesPositionsOnBoard.insert(pair<string,Piece>("e4",p));
-
-    Piece r;
-    r.initiatePiece(y); //rook
-    cout<<r.getNamePiece()<<endl;
-   
-    Player pl("white");
-    pl.initiatePlayer(allPiecesPositionsOnBoard);
-    cout<<"number of pieces : "<<pl.getPlayerPiecesPositions().size()<<endl;
-    cout<<pl.getPlayerPiecesPositions().count("a6")<<endl;
-    cout<<"name of piece a6: "<<pl.getPlayerPiecesPositions().at("a6").getNamePiece()<<endl;
-    pl.getPlayerPiecesPositions().at("a6").setNamePiece("YOLO !");
-    cout<<"new name of piece a6: "<<pl.getPlayerPiecesPositions().at("a6").getNamePiece()<<endl;
-
-
-    cout<<"size : "<<pl.getCapturedPieces().size()<<endl;
-    pl.setCapturedPiece(p);
-    pl.setCapturedPiece(r);
-    cout<<"new size : "<<pl.getCapturedPieces().size()<<endl;
-    
-    cout<<"first captured piece : "<<pl.getCapturedPieces()[0].getNamePiece()<<endl;
-    cout<<"second captured piece : "<<pl.getCapturedPieces()[1].getNamePiece()<<endl;
-    pl.getCapturedPieces()[0].setNamePiece("Yo");
-    cout<<"new name first captured piece : "<<pl.getCapturedPieces()[0].getNamePiece()<<endl;*/
-
-//}
+    return true; // Path is clear  
+}
 
 //to complete
 //bool Board::isCaseUnderAttack
 //bool Board::isKingUnderAttack
-/*
+
+//good
 int Board::gameLogic(Player player1,Player player2){
     int n=0;
     if(numberOfTurn==0){
@@ -350,7 +324,9 @@ int Board::gameLogic(Player player1,Player player2){
         //player2 play
         playerTurn(player2,player1);
         numberOfTurn++;
+        cout<<"\nNumber of Turn : "<<getNumberOfTurn()<<endl;
 
+        //to fix
         while(n==0){
             n=playerExit();
         }
@@ -358,10 +334,12 @@ int Board::gameLogic(Player player1,Player player2){
         return n;
     }
 
-    playerTurn(player1);
-    playerTurn(player2);
+    playerTurn(player1,player2);
+    playerTurn(player2,player1);    
     numberOfTurn++;
+    cout<<"\nNumber of Turn : "<<getNumberOfTurn()<<endl;
 
+    //to fix
     while(n==0){
         n=playerExit();
     }
@@ -370,6 +348,7 @@ int Board::gameLogic(Player player1,Player player2){
 
 }
 
+//good
 void Board::playerTurn(Player currentPlayer,Player adverser){
     int t=1;
     
@@ -384,11 +363,16 @@ void Board::playerTurn(Player currentPlayer,Player adverser){
         cout<<"\nIt's your turn player 2\n"<<endl;
     }
 
-    while(t!=0){
+    while(t==1){
        t=makeAMove(currentPlayer,adverser);
+       if(t==1){
+        cout<<"Uncorrect move. Redo your turn."<<endl;
+       }
+       
     }    
 }
 
+//good
 int Board::makeAMove(Player currentPlayer,Player adverser){
 
     //special move :castling :
@@ -404,105 +388,136 @@ int Board::makeAMove(Player currentPlayer,Player adverser){
             return 0;
         }
     }
-    else the turn is a classic one;
+    else the turn is a classic one;*/
     
-
     //choose piece to move
     string startPosition;
     cout<<"Enter the initial position of the piece you want to move :"<<endl;
-    cin>>startPosition;
+    //cin>>startPosition;
+    
+    getline(cin,startPosition);
 
+    startPosition=processMoveInput(startPosition); 
+
+    cout<<startPosition<<endl;
+
+    if(checkIfCorrectMoveInput(startPosition)==0){
+        cout << "Error: Enter a position in the correct format (e.g. a7)"<< endl;
+        return 1;
+    }
+
+    // Validate there's a piece at the starting position
+    if (piecesPositions.count(startPosition)== 0) {
+        cout << "Error: No piece found at " << startPosition << "." << endl;
+        return 1;
+    }
+    // Validate there's a piece at the starting position and it belongs to the player
+    if (piecesPositions.count(startPosition)==1 && piecesPositions.at(startPosition).getColorPiece() != currentPlayer.getColorPlayer()) {
+        cout << "Error: This piece belongs to the other player." << endl;
+        return 1;
+    }
+    
     //choose final position
     string endPosition;
     cout<<"Enter the final position of the piece you want to move :"<<endl;
-    cin>>endPosition;
+    //cin>>endPosition;
+    
+    getline(cin,endPosition);
 
-    vector<int> v(2);
-    v=generateCaseCoordinates(endPosition);
+    endPosition=processMoveInput(endPosition);
 
-    Piece p=piecesPositions.at(startPosition);
+    cout<<endPosition<<endl;
 
-    if(p.getColorPiece()==currentPlayer.getColorPlayer()){
-        if(p.isMoveLegal(v)){
-            //if final case empty
-            if(not piecesPositions.count(endPosition)){
-                p.setCaseCoordinate(v);
-                p.setCasePiece(endPosition);
-                p.wasMoved();
-                piecesPositions.insert(pair<string,Piece>(endPosition,p));
-                currentPlayer.getPlayerPiecesPositions().insert(pair<string,Piece>(endPosition,p));
-                piecesPositions.erase(startPosition);
-                currentPlayer.getPlayerPiecesPositions().erase(startPosition);
-                currentPlayer.playedAMove();
+    vector<int> endCoordinates=generateCaseCoordinates(endPosition);
 
-            }
+    Piece& p=piecesPositions.at(startPosition);
 
-            //if final case is occupied by one of player's piece
-            if(isCaseOccupied(v) and piecesPositions.at(endPosition).getColorPiece()==currentPlayer.getColorPlayer()){
+    if(!p.isMoveLegal(endCoordinates)){
+        cout << "Error: The move is not legal for this piece." << endl;
+        return 1;
+    }
+    
+    if(p.getNamePiece()!="knight" && !isPathClear(startPosition,endPosition)){
+        cout << "Error: The path is blocked." << endl;
+        return 1;
+    }
 
-                cout<<"Error : Moving "<<piecesPositions.at(startPosition).getNamePiece()<<"from "<<startPosition
-                <<"to "<<endPosition<< " is impossible !"<<endl;
-                return 1;
-            }
+    // If the final case is empty, just move the piece
+    if (!piecesPositions.count(endPosition)) {
+        p.setCaseCoordinate(endCoordinates);
+        p.setCasePiece(endPosition);
+        p.wasMoved();
+        
+        piecesPositions[endPosition] = p;
+        currentPlayer.getPlayerPiecesPositions()[endPosition] = p;
 
-            //if final case is occupied by one of the adverser's piece
-            if(isCaseOccupied(v) and piecesPositions.at(endPosition).getColorPiece()==adverser.getColorPlayer()){
-                p.setCaseCoordinate(v);
-                p.setCasePiece(endPosition);
-                p.wasMoved();
+        piecesPositions.erase(startPosition);
+        currentPlayer.getPlayerPiecesPositions().erase(startPosition);
 
-                Piece adverserP=piecesPositions.at(endPosition);
-                adverserP.setIsCaptured(true);
+        currentPlayer.playedAMove();
+    }
+    else{
+        // If final position is occupied by one of the adverser's pieces and handle the capture
+        if (piecesPositions.at(endPosition).getColorPiece() == adverser.getColorPlayer()) {
+            // Capture the piece
+            Piece adverserPiece = piecesPositions.at(endPosition);
+            adverserPiece.setIsCaptured(true);
+            currentPlayer.getCapturedPieces().push_back(adverserPiece);
 
-                currentPlayer.getCapturedPieces().push_back(adverserP);
-                
-                piecesPositions.insert(pair<string,Piece>(endPosition,p));
-                piecesPositions.erase(startPosition);
-                adverser.getPlayerPiecesPositions().erase(endPosition);
-                currentPlayer.playedAMove();
-            }    
+            p.setCaseCoordinate(endCoordinates);
+            p.setCasePiece(endPosition);
+            p.wasMoved();
+
+            piecesPositions[endPosition] = p;
+            piecesPositions.erase(startPosition);
+
+            adverser.getPlayerPiecesPositions().erase(endPosition);
+            currentPlayer.playedAMove();
+        } 
+        // If final position is occupied by the player's own piece
+        else if (piecesPositions.at(endPosition).getColorPiece() == currentPlayer.getColorPlayer()) {
+            cout << "Error: You can't move a piece to a square occupied by your own piece." << endl;
+            return 1;
         }
+    }
 
-        //special case : pawn Capture: if final case is occupied by one of the adverser's piece and we are moving a pawn to make a capture
-        if(isCaseOccupied(v) and piecesPositions.at(endPosition).getColorPiece()==adverser.getColorPlayer() and p.getNamePiece()=="pawn"){
-            //if pawn can reach it to capture it
-            if(p.pawnCapture(v)){
+    // Special case: Pawn Capture (diagonal capture) and move check
+    if (p.getNamePiece() == "pawn" && isCaseOccupied(endCoordinates) && piecesPositions.at(endPosition).getColorPiece() == adverser.getColorPlayer()) {
+        if (p.pawnCapture(endCoordinates)) {
+            // Capture logic as explained above
+            Piece adverserPiece = piecesPositions.at(endPosition);
+            adverserPiece.setIsCaptured(true);
+            currentPlayer.getCapturedPieces().push_back(adverserPiece);
 
-                p.setCaseCoordinate(v);
-                p.setCasePiece(endPosition);
+            p.setCaseCoordinate(endCoordinates);
+            p.setCasePiece(endPosition);
+            p.wasMoved();
 
-                Piece adverserP=piecesPositions.at(endPosition);
-                adverserP.setIsCaptured(true);
+            piecesPositions[endPosition] = p;
+            piecesPositions.erase(startPosition);
+            adverser.getPlayerPiecesPositions().erase(endPosition);
 
-                currentPlayer.getCapturedPieces().push_back(adverserP);
-                
-                piecesPositions.insert(pair<string,Piece>(endPosition,p));
-                piecesPositions.erase(startPosition);
-                adverser.getPlayerPiecesPositions().erase(endPosition);
-                currentPlayer.playedAMove();
-
-            }
-        }     
-
-        //special case : pawn promotion : if the piece we just moved is a pawn and it reached the adverser's camp
-        if(currentPlayer.getPlayerPiecesPositions().at(endPosition).getNamePiece()=="pawn" ){
-            int row=currentPlayer.getPlayerPiecesPositions().at(endPosition).getCaseCoordinate()[0];
-            if(row==0 or row==7 ){
-                currentPlayer.getPlayerPiecesPositions().at(endPosition).pawnPromotion();//promotes the pawn and update its name
-                string newNamePiece=currentPlayer.getPlayerPiecesPositions().at(endPosition).getNamePiece();
-                piecesPositions.at(endPosition).setNamePiece(newNamePiece);
-
-                currentPlayer.getPlayerPiecesPositions().at(endPosition).wasMoved();
-                piecesPositions.at(endPosition).wasMoved();
-                currentPlayer.playedAMove();
-            }
+            currentPlayer.playedAMove();
         }
+    }
 
-        return 0;
-    } 
+    // Special case: Pawn Promotion (if the pawn reaches the enemy's back row)
+    if (p.getNamePiece() == "pawn") {
+        int row = p.getCaseCoordinate()[0];
+        if (row == 0 || row == 7) {
+            currentPlayer.getPlayerPiecesPositions().at(endPosition).pawnPromotion(); // Promote the pawn
 
-    cout<<"Error : You can't move place belonging to the other play ."<<endl;
-    return 1;
+            string newPieceName = currentPlayer.getPlayerPiecesPositions().at(endPosition).getNamePiece();
+            piecesPositions.at(endPosition).setNamePiece(newPieceName);
+
+            piecesPositions.at(endPosition).wasMoved();
+            currentPlayer.getPlayerPiecesPositions().at(endPosition).wasMoved();
+
+            currentPlayer.playedAMove();
+        }
+    }
+
+    return 0;
 }
 
 int Board::playerExit(){
@@ -510,9 +525,72 @@ int Board::playerExit(){
     cout<<"Choose an option :"<<endl;
     cout<<"1.Continue   2.Exit  3.Save and Exit:"<<endl;
     cin>>x;
+    cin.ignore();
 
-    if(x<1 or x>3){
+    if(x<1 || x>3){
         return 0;
     }
     return x;
+}
+
+//good
+bool Board::checkIfCorrectMoveInput(string moveInput) {
+    if (moveInput.length() != 2) {
+        return false; // Input must be exactly two characters
+    }
+
+    char col = moveInput[0]; // First character should be a-h
+    char row = moveInput[1]; // Second character should be 1-8
+
+    vector<char> colName = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'}; // Columns should be letters
+    vector<char> rowName = {'1', '2', '3', '4', '5', '6', '7', '8'}; // Rows should be numbers
+
+    bool isColCorrect = false, isRowCorrect = false;
+
+    for (char c : colName) {
+        if (c == col) {
+            isColCorrect = true;
+            break;
+        }
+    }
+
+    for (char r : rowName) {
+        if (r == row) {
+            isRowCorrect = true;
+            break;
+        }
+    }
+
+    return isRowCorrect && isColCorrect;
+}
+
+//good
+string Board::processMoveInput(string moveInput){
+
+    moveInput.erase(remove_if(moveInput.begin(), moveInput.end(), ::isspace), moveInput.end());
+    transform(moveInput.begin(), moveInput.end(), moveInput.begin(), ::tolower);
+
+    return moveInput;
+}
+
+/*int main(){
+
+    Board b;
+    b.initiateBoard();
+    cout<<"row :"<<b.getBoard().size()<<endl;
+    cout<<"column : "<<b.getBoard()[0].size()<<endl;
+
+    Player p1("white");
+    Player p2("black");
+
+    p1.initiatePlayer(b.getPiecesPositions());
+    p2.initiatePlayer(b.getPiecesPositions());
+
+    int t=1;
+
+    while(t==1){
+        t=b.gameLogic(p1,p2);
+        cout<<"\nnumber of Turn : "<<b.getNumberOfTurn()<<endl;
+    }
 }*/
+ 

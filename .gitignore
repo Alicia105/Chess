@@ -3,3 +3,4 @@
 .vscode/launch.json
 src/player.exe
 src/board.exe
+src/menu.exe
