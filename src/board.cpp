@@ -436,7 +436,7 @@ bool Board::isCheckMate(Player p){
         return false;
     }
     
-    if (!isKingUnderAttack(p)) {
+    if (!isKingUnderAttack(p,getKingPosition(p))) {
         return false; // Not in check, so not checkmate
     }
 
@@ -463,7 +463,7 @@ bool Board::isCheckMate(Player p){
 
             // If the square is not occupied by the same color and doesn't put king in check, it's a valid escape
             if ((!piecesPositions.count(newPosition) || piecesPositions.at(newPosition).getColorPiece() != kingColor) &&
-                !isKingUnderAttack(kingColor)) {
+                !isKingUnderAttack(p,newPosition)) {
                 return false; // King has an escape move, so it's not checkmate
             }
         }
@@ -593,7 +593,7 @@ int Board::gameLogic(Player player1,Player player2){
         //player2 play
         t=playerTurn(player2,player1);
         numberOfTurn++;
-        cout<<"\nNumber of Turn : "<<getNumberOfTurn()<<endl;
+        cout<<"\nNumber of Turn : "<<getNumberOfTurn()<<"\n"<<endl;
         if(t==4){
             return t;
         }
@@ -601,7 +601,9 @@ int Board::gameLogic(Player player1,Player player2){
         //to fix
         while(n==0){
             n=playerExit();
-            cout<<"Please enter a valid option"<<endl;
+            if(n==0){
+                cout<<"Please enter a valid option"<<endl;
+            }
         }
            
         return n;
@@ -631,7 +633,7 @@ int Board::gameLogic(Player player1,Player player2){
         return t;
     }
 
-    //to fix
+    
     while(n==0){
         n=playerExit();
         cout<<"Please enter a valid option"<<endl;
@@ -867,7 +869,8 @@ int Board::playerExit(){
     if(x==3){
         return 7;
     }
-   
+
+    return 0;
 }
 
 //good

@@ -46,7 +46,7 @@ class Board{
     void movePiece(std::string from, std::string to);
     bool isCaseOccupied(std::vector<int> coordinates);//good
     bool isPathClear(std::string startPosition,std::string endPosition);//good
-    std::vector<string> Board::findKingAttackers(Player pl);
+    std::vector<std::string> findKingAttackers(Player pl);
     bool isKingUnderAttack(Player p,std::string kingPosition);
     bool isCheckMate(Player p);
     bool isStaleMate(Player p);
