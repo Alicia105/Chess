@@ -44,14 +44,18 @@ int main(){
     printWelcome();
     printRules();
 
-    int t=1;
+    int t=5;
 
-    while(t==1){
+    while(t==5){
         t=b.gameLogic(p1,p2);
     }
 
-    if(t==3){
-        cout<<"Your was successfully saved !"<<endl;
+    if(t==7){
+        cout<<"Your game was successfully saved !"<<endl;
+    }
+
+    if(t==4){
+        cout<<"Error: Unexpected internal error"<<endl;
     }
 
     printBye();
