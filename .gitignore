@@ -5,3 +5,6 @@ src/player.exe
 src/board.exe
 src/menu.exe
 src/n.cpp
+src/l.cpp
+m.cpp
+src/o.cpp

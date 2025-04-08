@@ -130,6 +130,7 @@ void Piece::setCaseCoordinate(vector<int> coordinates){
     coordinatesOnBoard=coordinates;
 }
 
+
 void Piece::setNumberOfMove(int num){
     numberOfMove=num;
 }
@@ -280,32 +281,40 @@ void Piece::pawnPromotion(){
 
 //good
 bool Piece::pawnCapture(vector<int> coordinates){
+
+    if (coordinatesOnBoard.size() < 2 || coordinates.size() < 2) {
+        cout << "Error: invalid coordinates in pawnCapture()" << endl;
+        return false;
+    }
+
+    int row = coordinatesOnBoard[0];
+    int col = coordinatesOnBoard[1];
+
     //stay on the board
-    if(coordinatesOnBoard[0]+1<=7 || coordinatesOnBoard[0]-1>=0){
-        if(coordinatesOnBoard[1]+1<=7 || coordinatesOnBoard[1]-1>=0){
-            if(colorPiece=="white"){
-                //top left
-                if(coordinates[0]==coordinatesOnBoard[0]-1 && coordinates[1]==coordinatesOnBoard[1]-1){
-                    return true;
-                }
+    if((row+1<=7 || row-1>=0) && (col+1<=7 || col-1>=0)){
+        if(colorPiece=="white"){
+            //top left
+            if(coordinates[0]==row-1 && coordinates[1]==col-1){
+                return true;
+            }
 
-                //top right
-                if(coordinates[0]==coordinatesOnBoard[0]-1 && coordinates[1]==coordinatesOnBoard[1]+1){
-                    return true;
-                }
+            //top right
+            if(coordinates[0]==row-1 && coordinates[1]==col+1){
+                return true;
+            }
                 
+        }
+        if(colorPiece=="black"){
+            //bottom left
+            if(coordinates[0]==row+1 && coordinates[1]==col-1){
+                return true;
             }
-            if(colorPiece=="black"){
-                //bottom left
-                if(coordinates[0]==coordinatesOnBoard[0]+1 && coordinates[1]==coordinatesOnBoard[1]-1){
-                    return true;
-                }
 
-                //bottom right
-                if(coordinates[0]==coordinatesOnBoard[0]+1 && coordinates[1]==coordinatesOnBoard[1]+1){
-                    return true;
-                }   
-            }
+            //bottom right
+            if(coordinates[0]==row+1 && coordinates[1]==col+1){
+                return true;
+            }   
+            
         }
     }
     

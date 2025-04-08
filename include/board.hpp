@@ -27,11 +27,12 @@ class Board{
     std::vector<int> getCase(std::string nameCaseInChess);//nameCaseInChess:name of the case in chess nomenclature 
     std::map<std::string,Piece>& getPiecesPositions();//good
     int getNumberOfTurn();//good
-    std::string getKingPosition(Player pl);
-    std::vector<std::vector<int>> getPath(std::vector<int> startCoordinates, std::vector<int> endCoordinates);
+    std::string getKingPosition(Player pl);//good
+    std::vector<std::vector<int>> getPath(std::vector<int> startCoordinates, std::vector<int> endCoordinates);//good
 
     //setters
 
+    void clearBoard();
     //coordinates in C++: coordinates[0]=row,coordinates[1]column;
     void setCase(std::vector<int> coordinates,std::string nameCaseInChess);//good ->coordinates in C++,nameCaseInChess:name of the case in chess nomenclature-->name the case with nameInChess
     std::string generateNameCase(std::vector<int> coordinates);//good ->coordinates in C++, return nameCaseInChess
@@ -50,6 +51,8 @@ class Board{
     bool isKingUnderAttack(Player p,std::string kingPosition);
     bool isCheckMate(Player p);
     bool isStaleMate(Player p);
+    bool isEnPassant(Player currentPlayer,Player adverser,std::string startPosition,std::string endPosition);
+    
 
 
     //bool isCaseUnderAttack();
@@ -57,7 +60,7 @@ class Board{
     int gameLogic(Player player1,Player player2);//good
     int playerTurn(Player player1,Player player2);//good
     int makeAMove(Player currentPlayer,Player adverser);//good
-    int playerExit();
+    int playerExit();//good
     bool checkIfCorrectMoveInput(std::string moveInput);//good
     std::string processMoveInput(std::string moveInput);//good
     
