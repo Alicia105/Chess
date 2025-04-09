@@ -938,7 +938,7 @@ bool Board::isStaleMate(Player p){
 }
 
 //isEnPassant possible
-//pb
+
 bool Board::isEnPassant(Player currentPlayer,Player adverser,string startPosition,string endPosition){
 
     // Check possible pawn neighbours
@@ -963,12 +963,13 @@ bool Board::isEnPassant(Player currentPlayer,Player adverser,string startPositio
         for(auto move : moves){
             cout<<"2"<<endl;
             //check only neighbours on board 
-            int c = currentPlayer.getPlayerPiecesPositions().at(startPosition).getCaseCoordinate()[1];
+            int c = piecesPositions.at(startPosition).getCaseCoordinate()[1];
+            cout<<"c:"<<c<<endl;
             if(c+move.second>=0 && c+move.second<8){
                 cout<<"3"<<endl;
                 //check if a potential adverser pawn is next to current player pawn
-                int row=currentPlayer.getPlayerPiecesPositions().at(startPosition).getCaseCoordinate()[0]+move.first;
-                int col=currentPlayer.getPlayerPiecesPositions().at(startPosition).getCaseCoordinate()[1]+move.second;
+                int row=piecesPositions.at(startPosition).getCaseCoordinate()[0]+move.first;
+                int col=piecesPositions.at(startPosition).getCaseCoordinate()[1]+move.second;
 
                 vector<int> adverserPawnCoord={row,col};
                 string adverserPawnPosition=generateNameCase(adverserPawnCoord);
@@ -1023,7 +1024,6 @@ bool Board::isEnPassant(Player currentPlayer,Player adverser,string startPositio
     return false;
 }
 
-
 //good
 bool Board::checkIfCorrectMoveInput(string moveInput) {
     if (moveInput.length() != 2) {
@@ -1064,6 +1064,7 @@ string Board::processMoveInput(string moveInput){
     return moveInput;
 }
 
+//good
 int Board::makeAMove(Player currentPlayer,Player adverser){
     //good
     string kingPosition=getKingPosition(currentPlayer);
@@ -1140,7 +1141,12 @@ int Board::makeAMove(Player currentPlayer,Player adverser){
 
     Piece& p=piecesPositions.at(startPosition);
 
-    /*if(isEnPassant(currentPlayer,adverser,startPosition,endPosition)){
+    if(piecesPositions.count(endPosition) && piecesPositions.at(endPosition).getNamePiece()=="king" && piecesPositions.at(endPosition).getColorPiece()==adverser.getColorPlayer()){
+        cout << "Error: You can't directly capture the king." << endl;
+        return 1;
+    }
+
+    if(isEnPassant(currentPlayer,adverser,startPosition,endPosition)){
         int direction;
         string playerColor = currentPlayer.getColorPlayer();
     
@@ -1181,7 +1187,7 @@ int Board::makeAMove(Player currentPlayer,Player adverser){
 
         cout << "Error: The pawn to caputre wasn't found." << endl; //should never happen
         return 1;
-    }*/
+    }
 
 
     if(!p.isMoveLegal(endCoordinates) && !(p.pawnCapture(endCoordinates) && p.getColorPiece()==currentPlayer.getColorPlayer())){
