@@ -32,7 +32,7 @@ class Board{
 
     //setters
 
-    void clearBoard();
+    void clearBoard();//good
     //coordinates in C++: coordinates[0]=row,coordinates[1]column;
     void setCase(std::vector<int> coordinates,std::string nameCaseInChess);//good ->coordinates in C++,nameCaseInChess:name of the case in chess nomenclature-->name the case with nameInChess
     std::string generateNameCase(std::vector<int> coordinates);//good ->coordinates in C++, return nameCaseInChess
@@ -43,20 +43,23 @@ class Board{
     void printBoard();//good
 
     //for game logic
-    void updateScore(Player p);
-    void movePiece(std::string from, std::string to);
+    void updateScore(Player p);//good
+    bool isKingsideCastlingPossible(Player currentPlayer);//good
+    bool isQueensideCastlingPossible(Player currentPlayer);//good
+    bool isCastlingPossible(Player p);//good
+    void chooseCastling(Player p);//good
+    void doQueensideCastling(Player p);//good
+    void doKingsideCastling(Player p);//good
+
+    void movePiece(std::string from, std::string to);//good
     bool isCaseOccupied(std::vector<int> coordinates);//good
     bool isPathClear(std::string startPosition,std::string endPosition);//good
-    std::vector<std::string> findKingAttackers(Player pl);
-    bool isKingUnderAttack(Player p,std::string kingPosition);
-    bool isCheckMate(Player p);
-    bool isStaleMate(Player p);
-    bool isEnPassant(Player currentPlayer,Player adverser,std::string startPosition,std::string endPosition);
+    std::vector<std::string> findKingAttackers(Player pl);//good
+    bool isKingUnderAttack(Player p,std::string kingPosition);//good
+    bool isCheckMate(Player p);//good
+    bool isStaleMate(Player p);//good
+    bool isEnPassant(Player currentPlayer,Player adverser,std::string startPosition,std::string endPosition);//good
     
-
-
-    //bool isCaseUnderAttack();
-    //bool Board::isKingUnderAttack
     int gameLogic(Player player1,Player player2);//good
     int playerTurn(Player player1,Player player2);//good
     int makeAMove(Player currentPlayer,Player adverser);//good

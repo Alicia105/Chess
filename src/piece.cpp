@@ -50,6 +50,10 @@ int Piece::getNumberOfMove(){
     return numberOfMove;
 }
 
+string Piece::getLastMove(){
+    return lastMove;
+}
+
 
 //setters
 
@@ -130,13 +134,17 @@ void Piece::setCaseCoordinate(vector<int> coordinates){
     coordinatesOnBoard=coordinates;
 }
 
-
 void Piece::setNumberOfMove(int num){
     numberOfMove=num;
 }
+
 //good
 void Piece::wasMoved(){
     numberOfMove+=1;
+}
+
+void Piece::setLastMove(string last){
+    lastMove=last;
 }
 
 

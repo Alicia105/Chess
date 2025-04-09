@@ -107,7 +107,7 @@ vector<vector<int>> Board::getPath(vector<int> startCoordinates, vector<int> end
 }
 
 //setters
-
+//good
 void Board::clearBoard(){
     piecesPositions.clear();
 }
@@ -238,6 +238,7 @@ void Board::initiateBoard(){
                 Piece p;
                 p.initiatePiece(coord);
                 p.setCasePiece(s);
+                p.setLastMove("");
                 piecesPositions.insert(pair<string,Piece>(s,p));
             }                  
 
@@ -303,6 +304,7 @@ void Board::printBoard(){
 
 
 //for game logic
+//good
 void Board::updateScore(Player p){
     if(p.getColorPlayer()=="white"){
         scorePlayer1+=1;
@@ -312,6 +314,355 @@ void Board::updateScore(Player p){
     }
 }
 
+//good
+bool Board::isKingsideCastlingPossible(Player currentPlayer) {
+
+    string kingPosition = getKingPosition(currentPlayer);
+    string kingColor = currentPlayer.getColorPlayer();
+
+    if (kingPosition.empty()){
+        return false; // King not found
+    }
+
+    if(kingColor=="white"){
+        // Ensure the king and rook squares are occupied
+        if (!piecesPositions.count("e1") || !piecesPositions.count("h1")){
+            return false;
+        }
+        // Ensure the king and rook haven't moved
+        if (piecesPositions.at("e1").getNumberOfMove()!=0 || piecesPositions.at("h1").getNumberOfMove()!=0){
+            return false;
+        }
+        // Ensure the squares between the king and rook are empty
+        if(!isPathClear("e1","h1")){
+            return false;
+        }
+        // Ensure the king is not in check and does not pass through a check
+        if(isKingUnderAttack(currentPlayer,"e1") || isKingUnderAttack(currentPlayer,"f1") || isKingUnderAttack(currentPlayer,"g1")){
+            return false;
+        }
+        return true;
+    }
+    if(kingColor=="black"){
+        // Ensure the king and rook squares are occupied
+        if (!piecesPositions.count("e8") || !piecesPositions.count("h8")){
+            return false;
+        }
+        // Ensure the king and rook haven't moved
+        if (piecesPositions.at("e8").getNumberOfMove()!=0 || piecesPositions.at("h8").getNumberOfMove()!=0){
+            return false;
+        }
+        // Ensure the squares between the king and rook are empty
+        if(!isPathClear("e8","h8")){
+            return false;
+        }
+        // Ensure the king is not in check and does not pass through a check
+        if(isKingUnderAttack(currentPlayer,"e8") || isKingUnderAttack(currentPlayer,"f8") || isKingUnderAttack(currentPlayer,"g8")){
+            return false;
+        }
+        return true;
+    }
+
+    return false; //should never happen
+}
+
+//good
+bool Board::isQueensideCastlingPossible(Player currentPlayer) {
+
+    string kingPosition = getKingPosition(currentPlayer);
+    string kingColor = currentPlayer.getColorPlayer();
+
+    if (kingPosition.empty()){
+        return false; // King not found
+    }
+
+    if(kingColor=="white"){
+        // Ensure the king and rook squares are occupied
+        if (!piecesPositions.count("e1") || !piecesPositions.count("a1")){
+            return false;
+        }
+        // Ensure the king and rook haven't moved
+        if (piecesPositions.at("e1").getNumberOfMove()!=0 || piecesPositions.at("a1").getNumberOfMove()!=0){
+            return false;
+        }
+        // Ensure the squares between the king and rook are empty
+        if(!isPathClear("e1","a1")){
+            return false;
+        }
+        // Ensure the king is not in check and does not pass through a check
+        if(isKingUnderAttack(currentPlayer,"e1") || isKingUnderAttack(currentPlayer,"d1") || isKingUnderAttack(currentPlayer,"c1") || isKingUnderAttack(currentPlayer,"b1")){
+            return false;
+        }
+        return true;
+    }
+    if(kingColor=="black"){
+        // Ensure the king and rook squares are occupied
+        if (!piecesPositions.count("e8") || !piecesPositions.count("a8")){
+            return false;
+        }
+        // Ensure the king and rook haven't moved
+        if (piecesPositions.at("e8").getNumberOfMove()!=0 || piecesPositions.at("a8").getNumberOfMove()!=0){
+            return false;
+        }
+        // Ensure the squares between the king and rook are empty
+        if(!isPathClear("e8","a8")){
+            return false;
+        }
+        // Ensure the king is not in check and does not pass through a check
+        if(isKingUnderAttack(currentPlayer,"e8") || isKingUnderAttack(currentPlayer,"d8") || isKingUnderAttack(currentPlayer,"c8") || isKingUnderAttack(currentPlayer,"b8")){
+            return false;
+        }
+        return true;
+    }
+    return false; //should never happen
+}
+
+//good
+bool Board::isCastlingPossible(Player p){
+    return isQueensideCastlingPossible(p) || isKingsideCastlingPossible(p);
+}
+
+//good
+void Board::chooseCastling(Player p){
+    int x;
+    cout<<"You can do a castling ! Do you want to do one ?"<<endl;
+    cout<<"1.Yes 2.No"<<endl;
+    cin>>x;
+
+    if(x==1){
+        if(isKingsideCastlingPossible(p) && isQueensideCastlingPossible(p)){
+            int y;
+            cout<<"On what side do you want to do a castling ?"<<endl;
+            cout<<"1.Kingside 2.Queenside 3.None"<<endl;
+            cin>>y;
+            if(y==1){
+                cout<<"You chose to do a Kingside castling"<<endl;
+                doKingsideCastling(p);
+                return;
+            }
+            if(y==2){
+                cout<<"You chose to do a Queenside castling"<<endl;
+                doQueensideCastling(p);
+                return;
+            }
+            else{
+                return;
+            }      
+        }
+        if(isKingsideCastlingPossible(p)){
+            int a;
+            cout<<"Do you want to do a Kingside castling ?"<<endl;
+            cout<<"1.Yes 2.No"<<endl;
+            cin>>a;
+            if(a==1){
+                doKingsideCastling(p);
+                return;
+            }
+            if(a==2){
+                return;
+            }
+            else{
+                cout<<"Error : Incorrect input"<<endl;
+                return;
+            }
+        }
+
+        if(isQueensideCastlingPossible(p)){
+            int b;
+            cout<<"Do you want to do a Queenside castling ?"<<endl;
+            cout<<"1.Yes 2.No"<<endl;
+            cin>>b;
+            if(b==1){
+                doQueensideCastling(p);
+                return;
+            }
+            if(b==2){
+                return;
+            }
+            else{
+                cout<<"Error : Incorrect input"<<endl;
+                return;
+            }
+        }
+    }
+    if(x==2){
+        return;
+    }
+    cout<<"Error : Incorrect input"<<endl;
+    return;
+
+}
+
+//good
+void Board::doQueensideCastling(Player p){
+    string colorPlayer=p.getColorPlayer();
+
+    if(colorPlayer=="white"){
+        string kingPosition="e1";
+        string rookPosition="a1";
+
+        string kingEndPosition="c1";
+        string rookEndPosition="d1";
+
+        Piece& king = piecesPositions.at(kingPosition);
+        Piece& rook = piecesPositions.at(rookPosition);
+
+        // for the king
+        vector<int> kingEndCoord = generateCaseCoordinates(kingEndPosition);
+        king.setCaseCoordinate(kingEndCoord);
+        king.setCasePiece(kingEndPosition);
+        king.setLastMove(kingPosition);
+        king.wasMoved();
+        
+        piecesPositions[kingEndPosition] = king;
+        p.getPlayerPiecesPositions()[kingEndPosition] = king;
+
+        piecesPositions.erase(kingPosition);
+        p.getPlayerPiecesPositions().erase(kingPosition);
+
+        // for the rook
+        vector<int> rookEndCoord = generateCaseCoordinates(rookEndPosition);
+        rook.setCaseCoordinate(rookEndCoord);
+        rook.setCasePiece(rookEndPosition);
+        rook.setLastMove(rookPosition);
+        rook.wasMoved();
+        
+        piecesPositions[rookEndPosition] = rook;
+        p.getPlayerPiecesPositions()[rookEndPosition] = rook;
+
+        piecesPositions.erase(rookPosition);
+        p.getPlayerPiecesPositions().erase(rookPosition);
+
+        p.playedAMove();
+        
+    }
+    if(colorPlayer=="black"){
+        string kingPosition="e8";
+        string rookPosition="a8";
+
+        string kingEndPosition="c8";
+        string rookEndPosition="d8";
+
+        Piece& king = piecesPositions.at(kingPosition);
+        Piece& rook = piecesPositions.at(rookPosition);
+
+        // for the king
+        vector<int> kingEndCoord = generateCaseCoordinates(kingEndPosition);
+        king.setCaseCoordinate(kingEndCoord);
+        king.setCasePiece(kingEndPosition);
+        king.setLastMove(kingPosition);
+        king.wasMoved();
+        
+        piecesPositions[kingEndPosition] = king;
+        p.getPlayerPiecesPositions()[kingEndPosition] = king;
+
+        piecesPositions.erase(kingPosition);
+        p.getPlayerPiecesPositions().erase(kingPosition);
+
+        // for the rook
+        vector<int> rookEndCoord = generateCaseCoordinates(rookEndPosition);
+        rook.setCaseCoordinate(rookEndCoord);
+        rook.setCasePiece(rookEndPosition);
+        rook.setLastMove(rookPosition);
+        rook.wasMoved();
+        
+        piecesPositions[rookEndPosition] = rook;
+        p.getPlayerPiecesPositions()[rookEndPosition] = rook;
+
+        piecesPositions.erase(rookPosition);
+        p.getPlayerPiecesPositions().erase(rookPosition);
+
+        p.playedAMove();
+    }
+
+
+}
+
+//good
+void Board::doKingsideCastling(Player p){
+    string colorPlayer=p.getColorPlayer();
+
+    if(colorPlayer=="white"){
+        string kingPosition="e1";
+        string rookPosition="h1";
+
+        string kingEndPosition="g1";
+        string rookEndPosition="f1";
+
+        Piece& king = piecesPositions.at(kingPosition);
+        Piece& rook = piecesPositions.at(rookPosition);
+
+        // for the king
+        vector<int> kingEndCoord = generateCaseCoordinates(kingEndPosition);
+        king.setCaseCoordinate(kingEndCoord);
+        king.setCasePiece(kingEndPosition);
+        king.setLastMove(kingPosition);
+        king.wasMoved();
+        
+        piecesPositions[kingEndPosition] = king;
+        p.getPlayerPiecesPositions()[kingEndPosition] = king;
+
+        piecesPositions.erase(kingPosition);
+        p.getPlayerPiecesPositions().erase(kingPosition);
+
+        // for the rook
+        vector<int> rookEndCoord = generateCaseCoordinates(rookEndPosition);
+        rook.setCaseCoordinate(rookEndCoord);
+        rook.setCasePiece(rookEndPosition);
+        rook.setLastMove(rookPosition);
+        rook.wasMoved();
+        
+        piecesPositions[rookEndPosition] = rook;
+        p.getPlayerPiecesPositions()[rookEndPosition] = rook;
+
+        piecesPositions.erase(rookPosition);
+        p.getPlayerPiecesPositions().erase(rookPosition);
+
+        p.playedAMove();
+        
+    }
+    if(colorPlayer=="black"){
+        string kingPosition="e8";
+        string rookPosition="h8";
+
+        string kingEndPosition="g8";
+        string rookEndPosition="f8";
+
+        Piece& king = piecesPositions.at(kingPosition);
+        Piece& rook = piecesPositions.at(rookPosition);
+
+        // for the king
+        vector<int> kingEndCoord = generateCaseCoordinates(kingEndPosition);
+        king.setCaseCoordinate(kingEndCoord);
+        king.setCasePiece(kingEndPosition);
+        king.setLastMove(kingPosition);
+        king.wasMoved();
+        
+        piecesPositions[kingEndPosition] = king;
+        p.getPlayerPiecesPositions()[kingEndPosition] = king;
+
+        piecesPositions.erase(kingPosition);
+        p.getPlayerPiecesPositions().erase(kingPosition);
+
+        // for the rook
+        vector<int> rookEndCoord = generateCaseCoordinates(rookEndPosition);
+        rook.setCaseCoordinate(rookEndCoord);
+        rook.setCasePiece(rookEndPosition);
+        rook.setLastMove(rookPosition);
+        rook.wasMoved();
+        
+        piecesPositions[rookEndPosition] = rook;
+        p.getPlayerPiecesPositions()[rookEndPosition] = rook;
+
+        piecesPositions.erase(rookPosition);
+        p.getPlayerPiecesPositions().erase(rookPosition);
+
+        p.playedAMove();
+    }
+
+}
+
+//good
 vector<string> Board::findKingAttackers(Player pl){
 
     string kingPosition=getKingPosition(pl);
@@ -393,6 +744,7 @@ bool Board::isCaseOccupied(vector<int> coordinates){
 }
 
 //isKingInCheck
+//good
 bool Board::isKingUnderAttack(Player p,string kingPosition){
 
     string kingColor=p.getColorPlayer();
@@ -407,7 +759,7 @@ bool Board::isKingUnderAttack(Player p,string kingPosition){
         if (piece.second.getColorPiece() != kingColor) {
             vector<int> endCoord = generateCaseCoordinates(kingPosition);
             if (piece.second.isMoveLegal(endCoord) &&
-                (piece.second.getNamePiece() == "knight" || isPathClear(piece.first, kingPosition))) {
+                (piece.second.getNamePiece() == "knight" || isPathClear(piece.first, kingPosition))){
                 return true; // King is under attack
             }
         }
@@ -416,10 +768,12 @@ bool Board::isKingUnderAttack(Player p,string kingPosition){
 }
 
 //CheckMate
+//good
 bool Board::isCheckMate(Player p){
 
     // Find the king's position
     string kingPosition=getKingPosition(p);
+    //cout<<kingPosition<<endl;
 
     //Should never happen
     if (kingPosition.empty()){
@@ -427,9 +781,10 @@ bool Board::isCheckMate(Player p){
         return false;
     }
     
-    if (!isKingUnderAttack(p,getKingPosition(p))) {
+    if (!isKingUnderAttack(p,kingPosition)) {
         return false; // Not in check, so not checkmate
     }
+    //cout<<"is in check"<<endl;
 
     string kingColor=p.getColorPlayer();
 
@@ -448,13 +803,16 @@ bool Board::isCheckMate(Player p){
         int newX = kingCoord[0] + move.first;
         int newY = kingCoord[1] + move.second;
         vector<int> endCoord={newX,newY};
+        //cout<<"new king coord to try: {"<<newX<<","<<newY<<"}"<<endl;
 
         if (endCoord[0] >= 0 && endCoord[0] < 8 && endCoord[1] >= 0 && endCoord[1] < 8) { // Check board limits
             string newPosition = generateNameCase(endCoord);
+            //cout<<"new position :"<<newPosition<<endl;
 
             // If the square is not occupied by the same color and doesn't put king in check, it's a valid escape
             if ((!piecesPositions.count(newPosition) || piecesPositions.at(newPosition).getColorPiece() != kingColor) &&
                 !isKingUnderAttack(p,newPosition)) {
+                //cout<<"here"<<endl;
                 return false; // King has an escape move, so it's not checkmate
             }
         }
@@ -463,10 +821,14 @@ bool Board::isCheckMate(Player p){
     //Can Attacker be aptured or blocked
     for(auto attackerPosition: attackers){
         for (auto pc : piecesPositions) {
-            if (pc.second.getColorPiece() == kingColor) { // Friendly piece
+            if (pc.second.getColorPiece() == kingColor && pc.second.getNamePiece()!="king") { // Friendly piece which is not the king
                 vector<int> attackCoord = generateCaseCoordinates(attackerPosition);
                 // Get the path from attacker to king (for blocking)
                 vector<vector<int>> pathToKing = getPath(attackCoord, kingCoord);
+
+                if (pc.second.isMoveLegal(attackCoord) && pc.second.getNamePiece()=="knight"){
+                    return false; // A knight can capture the attacker -> No checkmate
+                }
 
                 if (pc.second.isMoveLegal(attackCoord) && isPathClear(pc.second.getCasePiece(), attackerPosition)){
                     return false; // A piece can capture the attacker -> No checkmate
@@ -486,6 +848,7 @@ bool Board::isCheckMate(Player p){
 }
 
 //StaleMate
+//good
 bool Board::isStaleMate(Player p){
 
     // Find the king's position
@@ -520,13 +883,17 @@ bool Board::isStaleMate(Player p){
 
         if (endCoord[0] >= 0 && endCoord[0] < 8 && endCoord[1] >= 0 && endCoord[1] < 8) { // Check board limits
             string newPosition = generateNameCase(endCoord);
+            //cout << "here" << endl;
 
             // If the square is not occupied by the same color and doesn't put king in check, it's a valid escape
             if (!piecesPositions.count(newPosition) || piecesPositions.at(newPosition).getColorPiece() != kingColor){
                 // Simulate the move to see if it puts the king in check
                 Board tempBoard = *this;
                 tempBoard.movePiece(kingPosition, newPosition);
+                //cout << "See" << endl;
+
                 if (!tempBoard.isKingUnderAttack(p,newPosition)) {
+                    //cout << "we out here" << endl;
                     return false; // The king has a safe move, no stalemate
                 }
             }   
@@ -538,6 +905,7 @@ bool Board::isStaleMate(Player p){
         if (piece.second.getColorPiece() == kingColor) { // If the piece belongs to the current player
             string piecePosition = piece.first;
             vector<int> pieceCoord = generateCaseCoordinates(piecePosition);
+            //cout << "over here" << endl;
 
             // Generate all possible moves for this piece
             for (int i = 0; i <grid.size(); i++) {
@@ -548,12 +916,15 @@ bool Board::isStaleMate(Player p){
                     // Check if the move is legal
                     if (piece.second.isMoveLegal(testCoord) && 
                         (piece.second.getNamePiece() == "knight" || isPathClear(piecePosition, testPosition))) {
+                            //cout << "in grid" << endl;
                         
                         // Simulate the move to check if it avoids check
                         Board tempBoard = *this;
                         tempBoard.movePiece(piecePosition, testPosition);
-                        if (!tempBoard.isKingUnderAttack(p,getKingPosition(p))) {
+                        if (!tempBoard.isKingUnderAttack(p,testPosition)) {
+                            //cout << "yo" << endl;
                             return false; // A piece has a legal move, no stalemate
+
                         }
                     }
                 }
@@ -562,58 +933,85 @@ bool Board::isStaleMate(Player p){
     }
 
     // If no legal moves exist, it's a stalemate
+    //cout << "hello" << endl;
     return true;
 }
 
 //isEnPassant possible
+//pb
 bool Board::isEnPassant(Player currentPlayer,Player adverser,string startPosition,string endPosition){
 
-    // Define possible king moves
+    // Check possible pawn neighbours
     vector<pair<int, int>> moves = {{0,-1}, {0,1}};
+
+    //Get player colors
     string playerColor=currentPlayer.getColorPlayer();
     string adverserColor=adverser.getColorPlayer();
-    int originalRow;
 
-    if(adverserColor=="white"){
-        originalRow=6;
-    }
-    if(adverserColor=="black"){
-        originalRow=1;
-    }
+    cout<<"here"<<endl;
 
-    //this square is empty 
+    //the startPosition square is empty--> no piece to move 
     if(!piecesPositions.count(startPosition)){
         return false;
     }
 
+    cout<<"and here"<<endl;
+
     //check the current piece belongs to the player and is a pawn
     if(piecesPositions.at(startPosition).getColorPiece()==playerColor && piecesPositions.at(startPosition).getNamePiece()=="pawn"){
+        cout<<"1"<<endl;
         for(auto move : moves){
-            if(currentPlayer.getPlayerPiecesPositions().at(startPosition).getCaseCoordinate()[1]+move.second>=0 && currentPlayer.getPlayerPiecesPositions().at(startPosition).getCaseCoordinate()[1]+move.second<8){
-                vector<int> advPawnCoord={currentPlayer.getPlayerPiecesPositions().at(startPosition).getCaseCoordinate()[0]+move.first,currentPlayer.getPlayerPiecesPositions().at(startPosition).getCaseCoordinate()[1]+move.second};
-                string adverserPawnPosition=generateNameCase(advPawnCoord);
+            cout<<"2"<<endl;
+            //check only neighbours on board 
+            int c = currentPlayer.getPlayerPiecesPositions().at(startPosition).getCaseCoordinate()[1];
+            if(c+move.second>=0 && c+move.second<8){
+                cout<<"3"<<endl;
+                //check if a potential adverser pawn is next to current player pawn
+                int row=currentPlayer.getPlayerPiecesPositions().at(startPosition).getCaseCoordinate()[0]+move.first;
+                int col=currentPlayer.getPlayerPiecesPositions().at(startPosition).getCaseCoordinate()[1]+move.second;
+
+                vector<int> adverserPawnCoord={row,col};
+                string adverserPawnPosition=generateNameCase(adverserPawnCoord);
                 vector<int> endCoord=generateCaseCoordinates(endPosition);
     
-                //if the case is not empty and belongs to an adverser piece
+                //if the neighbour case is not empty and belongs to an adverser piece
                 if(piecesPositions.count(adverserPawnPosition) && piecesPositions.at(adverserPawnPosition).getColorPiece()!=playerColor){
-                    //if the case is pawn and only made one move
+                    cout<<"4"<<endl;
+                    //if this case is a pawn and only made one move
                     if(piecesPositions.at(adverserPawnPosition).getNamePiece()=="pawn" && piecesPositions.at(adverserPawnPosition).getNumberOfMove()==1){
-                        if(adverserColor=="white"){
-                            if(advPawnCoord[0]==originalRow-2){
-                                if(endCoord[0]==advPawnCoord[0]+1 && endCoord[1]==advPawnCoord[1]){
-                                    return true;
-                                }
+                        cout<<"5"<<endl;
+                        //Get the last position of the adverser pawn
+                        string lastAdverserPawnPosition=piecesPositions.at(adverserPawnPosition).getLastMove();
+                        vector<int> lastAdverserPawnCoord=generateCaseCoordinates(lastAdverserPawnPosition);
+
+                        if(lastAdverserPawnCoord[0]==6 && adverserColor=="white"){
+                            cout<<"6"<<endl;
+                            
+                            cout<<"endCoord x : "<<endCoord[0]<<endl;
+                            cout<<"endCoord y : "<<endCoord[1]<<endl;
+                            cout<<"adverserPawnCoord x : "<<adverserPawnCoord[0]<<endl;
+                            cout<<"adverserPawnCoord y : "<<adverserPawnCoord[1]<<endl;
+
+                            if(endCoord[0]==adverserPawnCoord[0]+1 && endCoord[1]==adverserPawnCoord[1]){
+                                cout<<"7"<<endl;
+                                return true;
                             }
+                            
+                            
                         }
-    
-                        if(adverserColor=="black"){
-                            if(advPawnCoord[0]==originalRow+2){
-                                if(endCoord[0]==advPawnCoord[0]-1 && endCoord[1]==advPawnCoord[1]){
-                                    return true;
-                                }
+                        if(lastAdverserPawnCoord[0]==1 && adverserColor=="black"){
+                            cout<<"8"<<endl;
+                            
+                            cout<<"endCoord x : "<<endCoord[0]<<endl;
+                            cout<<"endCoord y : "<<endCoord[1]<<endl;
+                            cout<<"adverserPawnCoord x : "<<adverserPawnCoord[0]<<endl;
+                            cout<<"adverserPawnCoord y : "<<adverserPawnCoord[1]<<endl;
+
+                            if(endCoord[0]==adverserPawnCoord[0]-1 && endCoord[1]==adverserPawnCoord[1]){
+                                cout<<"9"<<endl;
+                                return true;
                             }
-                        }
-                    
+                        }            
                     }
                 }
 
@@ -624,6 +1022,7 @@ bool Board::isEnPassant(Player currentPlayer,Player adverser,string startPositio
 
     return false;
 }
+
 
 //good
 bool Board::checkIfCorrectMoveInput(string moveInput) {
@@ -675,61 +1074,31 @@ int Board::makeAMove(Player currentPlayer,Player adverser){
         return 4;
     }
 
-    /*if(isStaleMate(currentPlayer)){
+    if(isStaleMate(currentPlayer)){
         cout<<"GAME OVER : Stalemate : That's a draw !"<<endl;
         return 3;
-    }*/
+    }
 
 
-    /*if(isCheckMate(currentPlayer)){
+    if(isCheckMate(currentPlayer)){
         cout<<"GAME OVER : You are checkmate !"<<endl;
         updateScore(adverser);
         return 2;
-    }*/
+    }
    
-    /*if(isKingUnderAttack(currentPlayer,kingPosition)){
+    if(isKingUnderAttack(currentPlayer,kingPosition)){
         cout<<"Beware : Your king is in check !"<<endl;
-    }*/
+    }
 
     //special move :castling :
-    /*if(isCastlingPossible()){
-        //ask if player want to do a castling
-        int x;
-        cout<< "You can do a castling.\n Do you want to do it ?\n 1.Yes 2.No"<<endl;
-        cin>>x
-        if(x){
-            isPathClear(string startPosition, string endPosition)
-            if(isPathClear("e4","a1") 
-            if(isPathClear("e4","h1")
-            if()
-            int y;
-            cout<< "Choose the castling side:\n 1.Queen side 2.King side"<<endl;
-            cin>>y;
-            if(y==1){
-                if(currentPlayer.getColorPlayer()=="white"){
-
-                }
-                if(currentPlayer.getColorPlayer()=="black"){
-                    
-                }
-            }
-            if(y==2){
-                if(currentPlayer.getColorPlayer()=="white"){
-                }
-                if(currentPlayer.getColorPlayer()=="black"){
-                    
-                }
-            }
-
-            
-            currentPlayer.playedAMove();
-            return 0;
-        }
+    if(isCastlingPossible(currentPlayer)){
+        chooseCastling(currentPlayer);
+        return 0;
     }
-    else the turn is a classic one;*/
+    
     
     //choose piece to move
-    //good--start
+    
     string startPosition;
     cout<<"Enter the initial position of the piece you want to move :"<<endl;
     //cin>>startPosition;
@@ -770,7 +1139,6 @@ int Board::makeAMove(Player currentPlayer,Player adverser){
     vector<int> endCoordinates=generateCaseCoordinates(endPosition);
 
     Piece& p=piecesPositions.at(startPosition);
-    
 
     /*if(isEnPassant(currentPlayer,adverser,startPosition,endPosition)){
         int direction;
@@ -790,22 +1158,29 @@ int Board::makeAMove(Player currentPlayer,Player adverser){
         string capturedPawnPos = generateNameCase(capturedPawnCoord);
     
         if (piecesPositions.count(capturedPawnPos)) {
-            Piece capturedPawn = piecesPositions.at(capturedPawnPos);
+            Piece& capturedPawn = piecesPositions.at(capturedPawnPos);
             capturedPawn.setIsCaptured(true);
             currentPlayer.getCapturedPieces().push_back(capturedPawn);
+            
             piecesPositions.erase(capturedPawnPos);
             adverser.getPlayerPiecesPositions().erase(capturedPawnPos);
+            p.setLastMove(startPosition);
+
+            // Move the current player's pawn
+            piecesPositions[endPosition] = p;
+            currentPlayer.getPlayerPiecesPositions()[endPosition] = p;
+
+            piecesPositions.erase(startPosition);
+            currentPlayer.getPlayerPiecesPositions().erase(startPosition);
+                        
+            p.wasMoved();    
+            currentPlayer.playedAMove();
+    
+            return 0;
         }
-    
-        // Move the current player's pawn
-        piecesPositions[endPosition] = p;
-        currentPlayer.getPlayerPiecesPositions()[endPosition] = p;
-    
-        piecesPositions.erase(startPosition);
-        currentPlayer.getPlayerPiecesPositions().erase(startPosition);
-    
-        currentPlayer.playedAMove();
-        return 0;
+
+        cout << "Error: The pawn to caputre wasn't found." << endl; //should never happen
+        return 1;
     }*/
 
 
@@ -824,6 +1199,7 @@ int Board::makeAMove(Player currentPlayer,Player adverser){
     if (!piecesPositions.count(endPosition)){
         p.setCaseCoordinate(endCoordinates);
         p.setCasePiece(endPosition);
+        p.setLastMove(startPosition);
         p.wasMoved();
         
         piecesPositions[endPosition] = p;
@@ -843,8 +1219,17 @@ int Board::makeAMove(Player currentPlayer,Player adverser){
             adverserPiece.setIsCaptured(true);
             currentPlayer.getCapturedPieces().push_back(adverserPiece);
 
+            /*if(adverserPiece.getNamePiece()=="king" && adverserPiece.getIsCaptured()){
+                if(isCheckMate(adverser)){
+                    cout<<"GAME OVER : You won !"<<endl;
+                    updateScore(currentPlayer);
+                    return 2;
+                }
+            }*/
+
             p.setCaseCoordinate(endCoordinates);
             p.setCasePiece(endPosition);
+            p.setLastMove(startPosition);
             p.wasMoved();
 
             piecesPositions[endPosition] = p;
@@ -871,8 +1256,17 @@ int Board::makeAMove(Player currentPlayer,Player adverser){
             adverserPiece.setIsCaptured(true);
             currentPlayer.getCapturedPieces().push_back(adverserPiece);
 
+            /*if(adverserPiece.getNamePiece()=="king" && adverserPiece.getIsCaptured()){
+                if(isCheckMate(adverser)){
+                    cout<<"GAME OVER : You won !"<<endl;
+                    updateScore(currentPlayer);
+                    return 2;
+                }
+            }*/
+
             p.setCaseCoordinate(endCoordinates);
             p.setCasePiece(endPosition);
+            p.setLastMove(startPosition);
             p.wasMoved();
 
             piecesPositions[endPosition] = p;
@@ -1051,157 +1445,101 @@ int Board::playerTurn(Player currentPlayer,Player adverser){
 }
 
 
-
 int main(){
 
     Board b;
     b.initiateBoard();
     cout<<"row :"<<b.getBoard().size()<<endl;
     cout<<"column : "<<b.getBoard()[0].size()<<endl;
-    b.printBoard();
+    //b.printBoard();
 
     Player p1("white");
     Player p2("black");
-    
-    b.clearBoard();
-    b.printBoard();
 
-    //Stalemate
-    b.clearBoard();
-    Piece kw;
-    Piece qw;
-    Piece kb;
+    int t=5;
 
-    kw.setColorPiece("white");
-    kw.setCaseCoordinate(b.generateCaseCoordinates("h1"));
-    kw.setCasePiece("h1");
-    kw.setNamePiece("king");
-
-    qw.setColorPiece("white");
-    qw.setCaseCoordinate(b.generateCaseCoordinates("f2"));
-    qw.setCasePiece("f2");
-    qw.setNamePiece("queen");
-
-    kb.setColorPiece("black");
-    kb.setCaseCoordinate(b.generateCaseCoordinates("h3"));
-    kb.setCasePiece("h3");
-    kb.setNamePiece("king");
-
-    b.getPiecesPositions()["h1"]=kw;
-    b.getPiecesPositions()["f2"]=qw;
-    b.getPiecesPositions()["h3"]=kb;
-
-    b.printBoard();
-
-    cout<<b.isStaleMate(p2)<<endl;
-
-    //check
-    b.clearBoard();
-    //Piece kw;
-    //Piece qw;
-    //Piece kb;
-
-    kw.setColorPiece("white");
-    kw.setCaseCoordinate(b.generateCaseCoordinates("h1"));
-    kw.setCasePiece("h1");
-    kw.setNamePiece("king");
-
-    qw.setColorPiece("white");
-    qw.setCaseCoordinate(b.generateCaseCoordinates("d5"));
-    qw.setCasePiece("d5");
-    qw.setNamePiece("queen");
-
-    kb.setColorPiece("black");
-    kb.setCaseCoordinate(b.generateCaseCoordinates("h8"));
-    kb.setCasePiece("h8");
-    kb.setNamePiece("king");
-
-    b.getPiecesPositions()["h1"]=kw;
-    b.getPiecesPositions()["d5"]=qw;
-    b.getPiecesPositions()["h8"]=kb;
-
-    b.printBoard();
-
-    cout<<b.isKingUnderAttack(p2,"h8")<<endl;
-
-    //checkmate
-    b.clearBoard();
-    //Piece kw;
-    //Piece qw;
-    //Piece kb;
-
-    kw.setColorPiece("white");
-    kw.setCaseCoordinate(b.generateCaseCoordinates("f6"));
-    kw.setCasePiece("f6");
-    kw.setNamePiece("king");
-
-    qw.setColorPiece("white");
-    qw.setCaseCoordinate(b.generateCaseCoordinates("g7"));
-    qw.setCasePiece("g7");
-    qw.setNamePiece("queen");
-
-    kb.setColorPiece("black");
-    kb.setCaseCoordinate(b.generateCaseCoordinates("h8"));
-    kb.setCasePiece("h8");
-    kb.setNamePiece("king");
-
-    b.getPiecesPositions()["f6"]=kw;
-    b.getPiecesPositions()["g7"]=qw;
-    b.getPiecesPositions()["h8"]=kb;
-
-    b.printBoard();
-
-    cout<<b.isCheckMate(p2)<<endl;
-
- 
-
-
+    while(t==5){
+        t=b.gameLogic(p1,p2);
+    }
     
 }
+    
+  /*Piece kw;
+    Piece rw1;
+    Piece rw2;
 
-    /*p1.initiatePlayer(b.getPiecesPositions());
-    p2.initiatePlayer(b.getPiecesPositions());
+    kw.setColorPiece("white");
+    kw.setCaseCoordinate(b.generateCaseCoordinates("e1"));
+    kw.setCasePiece("e1");
+    kw.setNamePiece("king");
+
+    rw1.setColorPiece("white");
+    rw1.setCaseCoordinate(b.generateCaseCoordinates("a1"));
+    rw1.setCasePiece("a1");
+    rw1.setNamePiece("rook");
+
+    rw2.setColorPiece("white");
+    rw2.setCaseCoordinate(b.generateCaseCoordinates("h1"));
+    rw2.setCasePiece("h1");
+    rw2.setNamePiece("rook");
+
+    
+
+    b.getPiecesPositions()["e1"]=kw;
+    //b.getPiecesPositions()["a1"]=rw1;
+    b.getPiecesPositions()["h1"]=rw2;
+
+    b.printBoard();
+    cout<<"\n\n"<<endl;
 
     cout<<b.getPiecesPositions().size()<<endl;
-    cout<<p1.getPlayerPiecesPositions().size()<<endl;
-    cout<<p2.getPlayerPiecesPositions().size()<<endl;
+    cout<<b.isCastlingPossible(p1)<<endl;
+    cout<<b.isKingsideCastlingPossible(p1)<<endl;
+    cout<<b.isQueensideCastlingPossible(p1)<<endl;
+    cout<<"\n\n"<<endl;
+    b.chooseCastling(p1);
 
-    Piece r;//mock piece for tests
-    r.setNamePiece("pawn");
-    r.setColorPiece("white");
-    r.setCasePiece("d7");
+    //b.doQueensideCastling(p1);
+    //b.doKingsideCastling(p1);
+    b.printBoard();
+
+    //cout<<b.isStaleMate(p2)<<endl;*/
+
+    /*b.clearBoard();
+    //b.printBoard();
+
+  
+    //Stalemate
+
+    Piece bk,bq, wk;
+
+    bk.setColorPiece("black");
+    bk.setNamePiece("king");
+    bk.setCasePiece("f2");
+    bk.setCaseCoordinate(b.generateCaseCoordinates("f2"));
+
+    bq.setColorPiece("black");
+    bq.setNamePiece("queen");
+    bq.setCasePiece("g3");
+    bq.setCaseCoordinate(b.generateCaseCoordinates("g3"));
+
+    wk.setColorPiece("white");
+    wk.setNamePiece("king");
+    wk.setCasePiece("h1");
+    wk.setCaseCoordinate(b.generateCaseCoordinates("h1"));
+
+    b.getPiecesPositions()["f2"] = bk;
+    b.getPiecesPositions()["g3"] =bq;
+    b.getPiecesPositions()["h1"] = wk;
+
+    b.printBoard();
+
+    Player black("black");
+    cout << "isCheckMate: " << b.isCheckMate(p1) << endl;
+    cout << "isKingUnderAttack: " << b.isKingUnderAttack(p1, "h1") << endl;
+    cout<< "isStalemate : "<< b.isStaleMate(p1);*/
    
     
-    string startPosition="d7";
-    string endPosition="e8";
-    b.getPiecesPositions().erase("d7");
-    p2.getPlayerPiecesPositions().erase("d7");
-    //b.getPiecesPositions().erase("e8");
-    //p2.getPlayerPiecesPositions().erase("e8");
-    b.printBoard();
-   
-    vector<int> endCoordinates=b.generateCaseCoordinates(endPosition);
-    vector<int> startCoordinates=b.generateCaseCoordinates(startPosition);
-    cout<<endCoordinates[0]<<endl;
-    cout<<endCoordinates[1]<<endl;
-    cout<<startCoordinates[0]<<endl;
-    cout<<startCoordinates[1]<<endl;
-
-    r.setCaseCoordinate(startCoordinates);
-    p1.getPlayerPiecesPositions()[startPosition]=r;
-    b.getPiecesPositions()[startPosition]=r;
-    b.printBoard();
-    cout<<"mock piece added to p1 : "<<p1.getPlayerPiecesPositions().size()<<endl;
-    cout<<"mock piece added to board : "<<b.getPiecesPositions().size()<<endl;
-    cout<<"piece removed from p2 : "<<p2.getPlayerPiecesPositions().size()<<endl;
-    cout<<r.getCaseCoordinate()[0]<<endl;
-    cout<<r.getCaseCoordinate()[1]<<endl;
-    //r.setCaseCoordinate({0,2});
-    //cout<<"new x : "<<r.getCaseCoordinate()[0]<<endl;
-    //cout<<"new y : "<<r.getCaseCoordinate()[1]<<endl;
-
-    b.makeAMove(p1,p2);*/
-
 
 
   

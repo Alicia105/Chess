@@ -28,7 +28,7 @@ void printBye(){
     return;
 } 
 
-/*int main(){
+int main(){
 
     //initiate basic components for game
     Board b;
@@ -60,7 +60,7 @@ void printBye(){
 
     printBye();
     return 0;
-}*/
+}
 
 
 
