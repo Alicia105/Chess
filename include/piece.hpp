@@ -14,6 +14,7 @@ class Piece{
     std::vector<int> coordinatesOnBoard;
     int numberOfMove;
     bool isCaptured;
+    bool isPromoted;
     std::string lastMove;
 
     public:
@@ -29,6 +30,7 @@ class Piece{
     int getNumberOfMove();//good
     bool getIsCaptured();//good
     std::string getLastMove();
+    bool getIsPromoted();
 
     //setters
 
@@ -41,6 +43,7 @@ class Piece{
     void setNumberOfMove(int num);//good
     void wasMoved();//good
     void setLastMove(std::string last);
+    void setIsPromoted(bool status);
 
     //piece moves
     

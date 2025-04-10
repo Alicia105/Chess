@@ -66,6 +66,15 @@ class Board{
     int playerExit();//good
     bool checkIfCorrectMoveInput(std::string moveInput);//good
     std::string processMoveInput(std::string moveInput);//good
+
+    //for ai
+    bool isGameOver(Player aiPlayer, Player opponent);
+    int evaluate(Player& aiPlayer, Player& humanPlayer);
+    void movePieceMini(string from, string to,Piece* capturedPiece = nullptr);
+    void undoMovePieceMini(string from, string to,Piece& capturedPiece);
+    int minimax(Player aiPlayer, Player humanPlayer, int depth, bool isMaximizing);
+    std::vector<std::vector<std::string>> getAllLegalMoves(Player currentPlayer,Player adverser);
+    vector<string> findBestMove(Player aiPlayer, Player opponent, int depth);
     
 };
 

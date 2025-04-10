@@ -11,6 +11,7 @@ Piece::Piece(){
     colorPiece="";
     casePiece="";
     isCaptured=false;
+    isPromoted=false;
     coordinatesOnBoard=vector<int>(2);
     numberOfMove=0;
 }
@@ -54,6 +55,9 @@ string Piece::getLastMove(){
     return lastMove;
 }
 
+bool Piece::getIsPromoted(){
+    return isPromoted;
+}
 
 //setters
 
@@ -145,6 +149,10 @@ void Piece::wasMoved(){
 
 void Piece::setLastMove(string last){
     lastMove=last;
+}
+
+void Piece::setIsPromoted(bool status){
+    isPromoted=status;
 }
 
 

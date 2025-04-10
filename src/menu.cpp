@@ -15,12 +15,25 @@ void printRules(){
     cout<<"You can exit at the end of each turn."<<endl;
     cout<<"Each piece is represented by the first letter of its name (except for knights that are indicated by n)."<<endl;
     cout<<"Their position is named by a letter from a to h for the column and a number from 8 to 1 for the row (e.g a6)"<<endl;
-    cout<<""<<endl;
     //cout<<"You can also choose to save the current board to resume later."<<endl;
     cout<<"May the best win !"<<endl;
 
     return;
 }
+
+int chooseOpponent(){
+    int x;
+    cout<<"Do you want to play against a human or AI ?"<<endl;
+    cout<<"1.Human 2.AI"<<endl;
+    cin>>x;
+   
+    while(x!=1 && x!=2){
+        cout<<"Please enter a valid option (1 or 2):"<<endl;
+        cin>>x;
+    }
+   
+    return x;
+} 
 
 void printBye(){
     cout<<"Thank you for playing our chess game !"<<endl;
@@ -43,23 +56,35 @@ int main(){
     //start game
     printWelcome();
     printRules();
+    int c=chooseOpponent();
 
-    int t=5;
+    if(c==1){
+        int t=5;
 
-    while(t==5){
-        t=b.gameLogic(p1,p2);
+        while(t==5){
+            t=b.gameLogic(p1,p2);
+        }
+
+        if(t==7){
+            cout<<"Your game was successfully saved !"<<endl;
+        }
+
+        if(t==4){
+            cout<<"Error: Unexpected internal error"<<endl;
+        }
+
+        printBye();
+        return 0;
+
+    }
+    if(c==2){
+
+        printBye();
+        return 0;
     }
 
-    if(t==7){
-        cout<<"Your game was successfully saved !"<<endl;
-    }
-
-    if(t==4){
-        cout<<"Error: Unexpected internal error"<<endl;
-    }
-
-    printBye();
     return 0;
+    
 }
 
 

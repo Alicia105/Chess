@@ -247,7 +247,6 @@ void Board::initiateBoard(){
 }
 
 
-
 //vizualisation
 //good
 void Board::printBoard(){
@@ -303,7 +302,7 @@ void Board::printBoard(){
 
 
 
-//for game logic
+//for game logic-----------------------------------------------------------------------------------------------------------------------------------------------
 //good
 void Board::updateScore(Player p){
     if(p.getColorPlayer()=="white"){
@@ -948,25 +947,25 @@ bool Board::isEnPassant(Player currentPlayer,Player adverser,string startPositio
     string playerColor=currentPlayer.getColorPlayer();
     string adverserColor=adverser.getColorPlayer();
 
-    cout<<"here"<<endl;
+    //cout<<"here"<<endl;
 
     //the startPosition square is empty--> no piece to move 
     if(!piecesPositions.count(startPosition)){
         return false;
     }
 
-    cout<<"and here"<<endl;
+    //cout<<"and here"<<endl;
 
     //check the current piece belongs to the player and is a pawn
     if(piecesPositions.at(startPosition).getColorPiece()==playerColor && piecesPositions.at(startPosition).getNamePiece()=="pawn"){
-        cout<<"1"<<endl;
+        //cout<<"1"<<endl;
         for(auto move : moves){
-            cout<<"2"<<endl;
+            //cout<<"2"<<endl;
             //check only neighbours on board 
             int c = piecesPositions.at(startPosition).getCaseCoordinate()[1];
-            cout<<"c:"<<c<<endl;
+            //cout<<"c:"<<c<<endl;
             if(c+move.second>=0 && c+move.second<8){
-                cout<<"3"<<endl;
+                //cout<<"3"<<endl;
                 //check if a potential adverser pawn is next to current player pawn
                 int row=piecesPositions.at(startPosition).getCaseCoordinate()[0]+move.first;
                 int col=piecesPositions.at(startPosition).getCaseCoordinate()[1]+move.second;
@@ -977,39 +976,39 @@ bool Board::isEnPassant(Player currentPlayer,Player adverser,string startPositio
     
                 //if the neighbour case is not empty and belongs to an adverser piece
                 if(piecesPositions.count(adverserPawnPosition) && piecesPositions.at(adverserPawnPosition).getColorPiece()!=playerColor){
-                    cout<<"4"<<endl;
+                    //cout<<"4"<<endl;
                     //if this case is a pawn and only made one move
                     if(piecesPositions.at(adverserPawnPosition).getNamePiece()=="pawn" && piecesPositions.at(adverserPawnPosition).getNumberOfMove()==1){
-                        cout<<"5"<<endl;
+                        //cout<<"5"<<endl;
                         //Get the last position of the adverser pawn
                         string lastAdverserPawnPosition=piecesPositions.at(adverserPawnPosition).getLastMove();
                         vector<int> lastAdverserPawnCoord=generateCaseCoordinates(lastAdverserPawnPosition);
 
                         if(lastAdverserPawnCoord[0]==6 && adverserColor=="white"){
-                            cout<<"6"<<endl;
+                            //cout<<"6"<<endl;
                             
-                            cout<<"endCoord x : "<<endCoord[0]<<endl;
-                            cout<<"endCoord y : "<<endCoord[1]<<endl;
-                            cout<<"adverserPawnCoord x : "<<adverserPawnCoord[0]<<endl;
-                            cout<<"adverserPawnCoord y : "<<adverserPawnCoord[1]<<endl;
+                            //cout<<"endCoord x : "<<endCoord[0]<<endl;
+                            //cout<<"endCoord y : "<<endCoord[1]<<endl;
+                            //cout<<"adverserPawnCoord x : "<<adverserPawnCoord[0]<<endl;
+                            //cout<<"adverserPawnCoord y : "<<adverserPawnCoord[1]<<endl;
 
                             if(endCoord[0]==adverserPawnCoord[0]+1 && endCoord[1]==adverserPawnCoord[1]){
-                                cout<<"7"<<endl;
+                                //cout<<"7"<<endl;
                                 return true;
                             }
                             
                             
                         }
                         if(lastAdverserPawnCoord[0]==1 && adverserColor=="black"){
-                            cout<<"8"<<endl;
+                            //cout<<"8"<<endl;
                             
-                            cout<<"endCoord x : "<<endCoord[0]<<endl;
-                            cout<<"endCoord y : "<<endCoord[1]<<endl;
-                            cout<<"adverserPawnCoord x : "<<adverserPawnCoord[0]<<endl;
-                            cout<<"adverserPawnCoord y : "<<adverserPawnCoord[1]<<endl;
+                            //cout<<"endCoord x : "<<endCoord[0]<<endl;
+                            //cout<<"endCoord y : "<<endCoord[1]<<endl;
+                            //cout<<"adverserPawnCoord x : "<<adverserPawnCoord[0]<<endl;
+                            //cout<<"adverserPawnCoord y : "<<adverserPawnCoord[1]<<endl;
 
                             if(endCoord[0]==adverserPawnCoord[0]-1 && endCoord[1]==adverserPawnCoord[1]){
-                                cout<<"9"<<endl;
+                                //cout<<"9"<<endl;
                                 return true;
                             }
                         }            
@@ -1295,6 +1294,7 @@ int Board::makeAMove(Player currentPlayer,Player adverser){
             if (currentPlayer.getPlayerPiecesPositions().count(endPosition)){
                 Piece& promotedPiece = currentPlayer.getPlayerPiecesPositions().at(endPosition);
                 promotedPiece.pawnPromotion(); // Promote the pawn
+                promotedPiece.setIsPromoted(true);
                 string newPieceName = promotedPiece.getNamePiece();
                 piecesPositions.at(endPosition).setNamePiece(newPieceName);
             }
@@ -1332,7 +1332,6 @@ int Board::playerExit(){
     return 0;
 }
 
-
 void Board::movePiece(string from, string to) {
     // If there is a piece at the "to" position, temporarily remove it
     bool captured = piecesPositions.count(to);
@@ -1349,7 +1348,6 @@ void Board::movePiece(string from, string to) {
 
     // If this was a simulation, you could restore the captured piece
 }
-
 
 //good
 int Board::gameLogic(Player player1,Player player2){
@@ -1450,8 +1448,481 @@ int Board::playerTurn(Player currentPlayer,Player adverser){
     return t;
 }
 
+//for ai game logic--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-int main(){
+bool Board::isGameOver(Player aiPlayer, Player opponent){
+    return isCheckMate(aiPlayer)|| isCheckMate(opponent);
+}
+
+int Board::evaluate(Player& aiPlayer, Player& opponent){
+    int score = 0;
+
+    // Piece value map
+    map<string, int> pieceValue = {
+        {"pawn", 100},
+        {"knight", 320},
+        {"bishop", 330},
+        {"rook", 500},
+        {"queen", 900},
+        {"king", 20000}
+    };
+
+    for (auto p : piecesPositions) {
+        Piece& piece = p.second;
+        string color = piece.getColorPiece();
+        string name = piece.getNamePiece();
+
+        int value = pieceValue[name];
+
+        if (color == aiPlayer.getColorPlayer()) {
+            score += value;
+        } else {
+            score -= value;
+        }
+    }
+
+    return score;
+}
+
+void Board::movePieceMini(string from, string to, Piece* capturedPiece = nullptr){
+    // If there is a piece at the "to" position, temporarily remove it
+    bool captured = piecesPositions.count(to);
+    Piece capturedPiece;
+    if (captured) {
+        *capturedPiece = piecesPositions.at(to);
+        piecesPositions.erase(to);
+    }
+
+    // Move the piece
+    piecesPositions[to] = piecesPositions[from];
+    piecesPositions[to].setCasePiece(to);
+    piecesPositions[to].setCaseCoordinate(generateCaseCoordinates(to));
+    piecesPositions.erase(from);
+
+    // If this was a simulation, you could restore the captured piece
+}
+
+void Board::undoMovePieceMini(string from, string to, Piece& capturedPiece){
+    // Undo the move by restoring the piece that was moved
+    piecesPositions[from] = piecesPositions[to];  // Move the piece back to the original position
+    piecesPositions[from].setCasePiece(from); // Update the case (position) of the moved piece
+    piecesPositions[from].setCaseCoordinate(generateCaseCoordinates(from));
+    piecesPositions.erase(to);  // Remove the piece from the destination position
+
+    // If a piece was captured, restore it back to the destination position
+    if (capturedPiece.getNamePiece() != "") {
+        piecesPositions[to] = capturedPiece; // Put back the captured piece at the destination
+    }
+}
+
+int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizingPlayer) {
+    string colorAIPlayer=aiPlayer.getColorPlayer();//black
+    string colorHumanPlayer=aiPlayer.getColorPlayer();//white
+
+    if (depth == 0 ||isGameOver(aiPlayer,opponent)) {
+        return evaluate(aiPlayer, opponent);
+    }
+
+    if (isMaximizingPlayer) {
+
+        //to maximize aiPlayer
+        int maxEval = INT_MIN;
+
+        vector<vector<string>> moves = getAllLegalMoves(aiPlayer,opponent);
+        for (auto move : moves) {
+            Board temp = *this;
+            Piece capturedPiece; // Store any captured piece
+            if(move.size()==4){
+                //castling case--> no capture
+                temp.movePiece(move[0],move[1]);
+                temp.movePiece(move[2],move[3]);
+                int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
+                //undo moves
+                temp.movePiece(move[1],move[0]);
+                temp.movePiece(move[3],move[2]);
+
+                maxEval = max(maxEval, eval);
+
+            }
+            else{
+                temp.movePieceMini(move[0],move[1],&capturedPiece);
+
+                if (temp.getPiecesPositions().at(move[1]).getNamePiece() == "pawn" && temp.getPiecesPositions().at(move[1]).getColorPiece()==colorAIPlayer) {
+                    int row=temp.getPiecesPositions().at(move[1]).getCaseCoordinate()[0];
+                    if (row == 0 && colorAIPlayer=="white"){
+                        temp.getPiecesPositions().at(move[1]).setIsPromoted(true);
+                        for(int i=0; i<4; i++){
+                            switch(i){
+                                case 0:
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("queen");
+                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
+                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
+                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+                                    break;
+                                case 1:
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("bishop");
+                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
+                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
+                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+                                    break;
+                                case 2:
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("rook");
+                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
+                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
+                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+                                    break;
+                                case 3:
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("knight");
+                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
+                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
+                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+                                    break;
+                            }
+                        }
+                    }
+                    if (row == 7 && colorAIPlayer=="black"){
+                        temp.getPiecesPositions().at(move[1]).setIsPromoted(true);
+                        for(int i=0; i<4; i++){
+                            switch(i){
+                                case 0:
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("queen");
+                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
+                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
+                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+                                    break;
+                                case 1:
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("bishop");
+                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
+                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
+                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+                                    break;
+                                case 2:
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("rook");
+                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
+                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
+                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+                                    break;
+                                case 3:
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("knight");
+                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
+                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
+                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+                                    break;
+                            }
+                        }
+                    }
+                }
+
+                int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
+                temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+
+                maxEval = max(maxEval, eval);
+
+            }
+            
+        }
+
+        return maxEval;
+    } else {
+        //to minimize aiPlayer
+        int minEval = INT_MAX;
+
+        vector<vector<string>> moves = getAllLegalMoves(opponent,aiPlayer);
+        for (auto move : moves) {
+            Board temp = *this;
+            Piece capturedPiece; // Store any captured piece
+            if(move.size()==4){
+                //castling-->no capture
+                temp.movePiece(move[0],move[1]);
+                temp.movePiece(move[2],move[3]);
+                int eval = temp.minimax(aiPlayer,opponent,depth - 1,true);
+                //undo moves
+                temp.movePiece(move[1],move[0]);
+                temp.movePiece(move[3],move[2]);
+
+                minEval = min(minEval, eval);
+
+            }
+            else{
+                temp.movePieceMini(move[0],move[1],&capturedPiece);
+                if (temp.getPiecesPositions().at(move[1]).getNamePiece() == "pawn" && temp.getPiecesPositions().at(move[1]).getColorPiece()==colorHumanPlayer){
+                    int row=temp.getPiecesPositions().at(move[1]).getCaseCoordinate()[0];
+                    if (row == 0 && colorHumanPlayer=="white"){
+                        temp.getPiecesPositions().at(move[1]).setIsPromoted(true);
+                        for(int i=0; i<4; i++){
+                            switch(i){
+                                case 0:
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("queen");
+                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1,true);
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
+                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
+                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+                                    break;
+                                case 1:
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("bishop");
+                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1,true);
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
+                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
+                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+                                    break;
+                                case 2:
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("rook");
+                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1, true);
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
+                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
+                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+                                    break;
+                                case 3:
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("knight");
+                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1,true);
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
+                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
+                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+                                    break;
+                            }
+                        }
+                    }
+                    if (row == 7 && colorHumanPlayer=="black"){
+                        temp.getPiecesPositions().at(move[1]).setIsPromoted(true);
+                        for(int i=0; i<4; i++){
+                            switch(i){
+                                case 0:
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("queen");
+                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1,true);
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
+                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
+                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+                                    break;
+                                case 1:
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("bishop");
+                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1,true);
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
+                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
+                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+                                    break;
+                                case 2:
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("rook");
+                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1,true);
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
+                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
+                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+                                    break;
+                                case 3:
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("knight");
+                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1,true);
+                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
+                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
+                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+                                    break;
+                            }
+                        }
+                    }                        
+
+                }
+
+                int eval = temp.minimax(aiPlayer,opponent,depth - 1,true);
+                temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+                minEval = min(minEval, eval);
+            }
+        }
+
+        return minEval;
+    }
+}
+
+vector<string> Board::findBestMove(Player aiPlayer, Player opponent, int depth){
+    int bestScore = INT_MIN;
+    vector<string> bestMove;
+
+    vector<vector<string>> moves = getAllLegalMoves(aiPlayer,opponent);
+    string colorAIPlayer=aiPlayer.getColorPlayer();
+    for ( auto move : moves){
+        Board temp = *this;
+        if(move.size()==4){
+            //castling case--> no capture
+            temp.movePiece(move[0],move[1]);
+            temp.movePiece(move[2],move[3]);
+        }
+        else{
+            temp.movePiece(move[0],move[1]);
+            if (temp.getPiecesPositions().at(move[1]).getNamePiece() == "pawn" && temp.getPiecesPositions().at(move[1]).getColorPiece()==colorAIPlayer) {
+                int row=temp.getPiecesPositions().at(move[1]).getCaseCoordinate()[0];
+                if (row == 0 && colorAIPlayer=="white"){
+                    temp.getPiecesPositions().at(move[1]).setIsPromoted(true);
+                    for(int i=0; i<4; i++){
+                        switch(i){
+                            case 0:
+                                temp.getPiecesPositions().at(move[1]).setNamePiece("queen");
+                                int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
+
+                                if (score > bestScore) {
+                                    bestScore = score;
+                                    move.push_back("queen");
+                                    bestMove = move;
+                                }
+                                
+                                break;
+                            case 1:
+                                temp.getPiecesPositions().at(move[1]).setNamePiece("bishop");
+                                int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
+
+                                if (score > bestScore) {
+                                    bestScore = score;
+                                    move.push_back("bishop");
+                                    bestMove = move;
+                                }
+                              
+                                break;
+                            case 2:
+                                temp.getPiecesPositions().at(move[1]).setNamePiece("rook");
+                                int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
+
+                                if (score > bestScore) {
+                                    bestScore = score;
+                                    move.push_back("rook");
+                                    bestMove = move;
+                                }
+                               
+                                break;
+                            case 3:
+                                temp.getPiecesPositions().at(move[1]).setNamePiece("knight");
+                                int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
+
+                                if (score > bestScore) {
+                                    bestScore = score;
+                                    move.push_back("knight");
+                                    bestMove = move;
+                                }
+                               
+                                break;
+                        }
+                    }
+                }
+                if (row == 7 && colorAIPlayer=="black"){
+                    temp.getPiecesPositions().at(move[1]).setIsPromoted(true);
+                    for(int i=0; i<4; i++){
+                        switch(i){
+                            case 0:
+                                temp.getPiecesPositions().at(move[1]).setNamePiece("queen");
+                                int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
+
+                                if (score > bestScore) {
+                                    bestScore = score;
+                                    move.push_back("queen");
+                                    bestMove = move;
+                                }
+                               
+                                break;
+                            case 1:
+                                temp.getPiecesPositions().at(move[1]).setNamePiece("bishop");
+                                int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
+
+                                if (score > bestScore) {
+                                    bestScore = score;
+                                    move.push_back("bishop");
+                                    bestMove = move;
+                                }
+                              
+                                break;
+                            case 2:
+                                temp.getPiecesPositions().at(move[1]).setNamePiece("rook");
+                                int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
+
+                                if (score > bestScore) {
+                                    bestScore = score;
+                                    move.push_back("rook");
+                                    bestMove = move;
+                                }
+                               
+                                break;
+                            case 3:
+                                temp.getPiecesPositions().at(move[1]).setNamePiece("knight");
+                                int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
+
+                                if (score > bestScore) {
+                                    bestScore = score;
+                                    move.push_back("knight");
+                                    bestMove = move;
+                                }
+                              
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
+        int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
+
+        if (score > bestScore) {
+            bestScore = score;
+            bestMove = move;
+        }
+    }
+
+    return bestMove;
+}
+
+vector<vector<string>> Board::getAllLegalMoves(Player currentPlayer,Player adverser){
+
+    string colorPlayer=currentPlayer.getColorPlayer();
+    vector<vector<string>> allMoves;
+
+    for(auto p : piecesPositions){
+        Piece& piece=p.second;
+        string name=piece.getNamePiece();
+        string start=piece.getCasePiece();
+        string color=piece.getColorPiece();
+
+        if(color==colorPlayer){
+            for(int i=0; i<grid.size(); i++){
+                for(int j=0; j<grid[0].size(); j++){
+                    vector<int> coord={i,j};
+                    string end=generateNameCase(coord);
+    
+                    if(piece.isMoveLegal(coord) && (piece.getNamePiece()=="knight" || isPathClear(start,end))){
+                        allMoves.push_back({start,end});
+                    }
+
+                    if(piece.getNamePiece()=="pawn" && piece.pawnCapture(coord)){
+                        allMoves.push_back({start,end});
+                    }
+
+                    if(isEnPassant(currentPlayer,adverser,start,end)){
+                        allMoves.push_back({start,end});
+                    }
+                }
+            }
+            if(isKingsideCastlingPossible(currentPlayer)){
+                if(colorPlayer=="white"){
+                    allMoves.push_back({"e1","g1","h1","f1"});
+                }
+                if(colorPlayer=="black"){
+                    allMoves.push_back({"e8","g8","h8","f8"});
+                }
+            }
+            if(isQueensideCastlingPossible(currentPlayer)){
+                if(colorPlayer=="white"){
+                    allMoves.push_back({"e1","c1","a1","d1"});
+                }
+                if(colorPlayer=="black"){
+                    allMoves.push_back({"e8","c8","a8","d8"});
+                }
+            }
+        }        
+    }
+    return allMoves;
+}
+
+/*int main(){
 
     Board b;
     b.initiateBoard();
@@ -1468,7 +1939,7 @@ int main(){
         t=b.gameLogic(p1,p2);
     }
     
-}
+}*/
     
   /*Piece kw;
     Piece rw1;
