@@ -1488,7 +1488,7 @@ int Board::evaluate(Player& aiPlayer, Player& opponent){
     return score;
 }
 
-void Board::movePieceMini(string from, string to, Piece* capturedPiece) {
+/*void Board::movePieceMini(string from, string to, Piece* capturedPiece) {
     // Check if there's a piece to capture
     if (piecesPositions.count(to) && capturedPiece != nullptr) {
         *capturedPiece = piecesPositions.at(to); // Store the captured piece in the pointer
@@ -1499,7 +1499,28 @@ void Board::movePieceMini(string from, string to, Piece* capturedPiece) {
     piecesPositions[to].setCasePiece(to);
     piecesPositions[to].setCaseCoordinate(generateCaseCoordinates(to));
     piecesPositions.erase(from);
+}*/
+
+void Board::movePieceMini(string from, string to, Piece* capturedPiece) {
+    if (!piecesPositions.count(from)) {
+        cout << "Error: No piece at source square " << from << endl;
+        return;
+    }
+
+    // Handle capture
+    if (piecesPositions.count(to) && capturedPiece != nullptr) {
+        *capturedPiece = piecesPositions.at(to);
+    } else if (capturedPiece != nullptr) {
+        *capturedPiece = Piece(); // default
+    }
+
+    // Move piece
+    piecesPositions[to] = piecesPositions.at(from);
+    piecesPositions[to].setCasePiece(to);
+    piecesPositions[to].setCaseCoordinate(generateCaseCoordinates(to));
+    piecesPositions.erase(from);
 }
+
 
 void Board::undoMovePieceMini(string from, string to, Piece& capturedPiece){
     // Undo the move by restoring the piece that was moved
@@ -1515,224 +1536,141 @@ void Board::undoMovePieceMini(string from, string to, Piece& capturedPiece){
 }
 
 int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizingPlayer) {
-    string colorAIPlayer=aiPlayer.getColorPlayer();//black
-    string colorHumanPlayer=aiPlayer.getColorPlayer();//white
+    string colorAIPlayer = aiPlayer.getColorPlayer();
+    string colorHumanPlayer = opponent.getColorPlayer();
 
-    if (depth == 0 ||isGameOver(aiPlayer,opponent)) {
+    if (depth == 0 || isGameOver(aiPlayer, opponent)) {
         return evaluate(aiPlayer, opponent);
     }
+    cout<<"Allons"<<endl;
 
     if (isMaximizingPlayer) {
-
-        //to maximize aiPlayer
         int maxEval = INT_MIN;
+        vector<vector<string>> moves = getAllLegalMoves(aiPlayer, opponent);
+        cout<<"marchons"<<endl;
 
-        vector<vector<string>> moves = getAllLegalMoves(aiPlayer,opponent);
         for (auto move : moves) {
             Board temp = *this;
-            Piece capturedPiece; // Store any captured piece
-            if(move.size()==4){
-                //castling case--> no capture
-                temp.movePiece(move[0],move[1]);
-                temp.movePiece(move[2],move[3]);
-                int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
-                //undo moves
-                temp.movePiece(move[1],move[0]);
-                temp.movePiece(move[3],move[2]);
+            Piece capturedPiece;
+
+            if (move.size() == 4) {
+                temp.movePiece(move[0], move[1]);
+                temp.movePiece(move[2], move[3]);
+                cout<<"1"<<endl;
+
+                int eval = temp.minimax(aiPlayer, opponent, depth - 1, false);
+                cout<<"2"<<endl;
+
+                temp.movePiece(move[1], move[0]);
+                temp.movePiece(move[3], move[2]);
+                cout<<"3"<<endl;
 
                 maxEval = max(maxEval, eval);
-
-            }
-            else{
-                temp.movePieceMini(move[0],move[1],&capturedPiece);
-
-                if (temp.getPiecesPositions().at(move[1]).getNamePiece() == "pawn" && temp.getPiecesPositions().at(move[1]).getColorPiece()==colorAIPlayer) {
-                    int row=temp.getPiecesPositions().at(move[1]).getCaseCoordinate()[0];
-                    if (row == 0 && colorAIPlayer=="white"){
-                        temp.getPiecesPositions().at(move[1]).setIsPromoted(true);
-                        for(int i=0; i<4; i++){
-                            switch(i){
-                                case 0:
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("queen");
-                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
-                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
-                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
-                                    break;
-                                case 1:
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("bishop");
-                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
-                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
-                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
-                                    break;
-                                case 2:
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("rook");
-                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
-                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
-                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
-                                    break;
-                                case 3:
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("knight");
-                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
-                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
-                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
-                                    break;
-                            }
-                        }
-                    }
-                    if (row == 7 && colorAIPlayer=="black"){
-                        temp.getPiecesPositions().at(move[1]).setIsPromoted(true);
-                        for(int i=0; i<4; i++){
-                            switch(i){
-                                case 0:
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("queen");
-                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
-                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
-                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
-                                    break;
-                                case 1:
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("bishop");
-                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
-                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
-                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
-                                    break;
-                                case 2:
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("rook");
-                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
-                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
-                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
-                                    break;
-                                case 3:
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("knight");
-                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
-                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
-                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
-                                    break;
-                            }
-                        }
-                    }
+            } else {
+                cout<<"4"<<endl;
+                cout << "Trying move from " << move[0] << " to " << move[1] << endl;
+                temp.movePieceMini(move[0], move[1], &capturedPiece);
+                cout<<"5"<<endl;
+                //for debugging
+                if(!temp.getPiecesPositions().count(move[1])){
+                    cout<<"help"<<endl;
                 }
 
-                int eval = temp.minimax(aiPlayer,opponent,depth - 1, false);
-                temp.undoMovePieceMini(move[1],move[0],capturedPiece);
+                string name = temp.getPiecesPositions().at(move[1]).getNamePiece();
+                string color = temp.getPiecesPositions().at(move[1]).getColorPiece();
+                int row = temp.getPiecesPositions().at(move[1]).getCaseCoordinate()[0];
+                cout<<"la"<<endl;
 
-                maxEval = max(maxEval, eval);
-
+                if (name == "pawn" && color == colorAIPlayer && ((color == "white" && row == 0) || (color == "black" && row == 7))) {
+                    temp.getPiecesPositions().at(move[1]).setIsPromoted(true);
+                    int eval;
+                    for (int i = 0; i < 4; i++) {
+                        switch (i) {
+                            case 0: temp.getPiecesPositions().at(move[1]).setNamePiece("queen"); break;
+                            case 1: temp.getPiecesPositions().at(move[1]).setNamePiece("bishop"); break;
+                            case 2: temp.getPiecesPositions().at(move[1]).setNamePiece("rook"); break;
+                            case 3: temp.getPiecesPositions().at(move[1]).setNamePiece("knight"); break;
+                        }
+                        eval = temp.minimax(aiPlayer, opponent, depth - 1, false);
+                        cout<<"6"<<endl;
+                        maxEval = max(maxEval, eval);
+                    }
+                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
+                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
+                    cout<<"7"<<endl;
+                    temp.undoMovePieceMini(move[1], move[0], capturedPiece);
+                    cout<<"8"<<endl;
+                } else {
+                    int eval = temp.minimax(aiPlayer, opponent, depth - 1, false);
+                    cout<<"9"<<endl;
+                    temp.undoMovePieceMini(move[1], move[0], capturedPiece);
+                    cout<<"10"<<endl;
+                    maxEval = max(maxEval, eval);
+                }
             }
-            
         }
-
         return maxEval;
     } else {
-        //to minimize aiPlayer
         int minEval = INT_MAX;
+        vector<vector<string>> moves = getAllLegalMoves(opponent, aiPlayer);
+        cout<<"enfants"<<endl;
 
-        vector<vector<string>> moves = getAllLegalMoves(opponent,aiPlayer);
         for (auto move : moves) {
             Board temp = *this;
-            Piece capturedPiece; // Store any captured piece
-            if(move.size()==4){
-                //castling-->no capture
-                temp.movePiece(move[0],move[1]);
-                temp.movePiece(move[2],move[3]);
-                int eval = temp.minimax(aiPlayer,opponent,depth - 1,true);
-                //undo moves
-                temp.movePiece(move[1],move[0]);
-                temp.movePiece(move[3],move[2]);
+            Piece capturedPiece;
+
+            if (move.size() == 4) {
+                temp.movePiece(move[0], move[1]);
+                temp.movePiece(move[2], move[3]);
+                cout<<"11"<<endl;
+
+                int eval = temp.minimax(aiPlayer, opponent, depth - 1, true);
+                cout<<"12"<<endl;
+
+                temp.movePiece(move[1], move[0]);
+                temp.movePiece(move[3], move[2]);
 
                 minEval = min(minEval, eval);
+            } else {
+                cout<<"13"<<endl;
+                temp.movePieceMini(move[0], move[1], &capturedPiece);
+                cout<<"14"<<endl;
 
-            }
-            else{
-                temp.movePieceMini(move[0],move[1],&capturedPiece);
-                if (temp.getPiecesPositions().at(move[1]).getNamePiece() == "pawn" && temp.getPiecesPositions().at(move[1]).getColorPiece()==colorHumanPlayer){
-                    int row=temp.getPiecesPositions().at(move[1]).getCaseCoordinate()[0];
-                    if (row == 0 && colorHumanPlayer=="white"){
-                        temp.getPiecesPositions().at(move[1]).setIsPromoted(true);
-                        for(int i=0; i<4; i++){
-                            switch(i){
-                                case 0:
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("queen");
-                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1,true);
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
-                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
-                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
-                                    break;
-                                case 1:
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("bishop");
-                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1,true);
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
-                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
-                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
-                                    break;
-                                case 2:
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("rook");
-                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1, true);
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
-                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
-                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
-                                    break;
-                                case 3:
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("knight");
-                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1,true);
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
-                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
-                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
-                                    break;
-                            }
+                string name = temp.getPiecesPositions().at(move[1]).getNamePiece();
+                string color = temp.getPiecesPositions().at(move[1]).getColorPiece();
+                int row = temp.getPiecesPositions().at(move[1]).getCaseCoordinate()[0];
+
+                if (name == "pawn" && color == colorHumanPlayer && ((color == "white" && row == 0) || (color == "black" && row == 7))) {
+                    temp.getPiecesPositions().at(move[1]).setIsPromoted(true);
+                    cout<<"15"<<endl;
+                    int eval;
+                    for (int i = 0; i < 4; i++) {
+                        switch (i) {
+                            case 0: temp.getPiecesPositions().at(move[1]).setNamePiece("queen"); break;
+                            case 1: temp.getPiecesPositions().at(move[1]).setNamePiece("bishop"); break;
+                            case 2: temp.getPiecesPositions().at(move[1]).setNamePiece("rook"); break;
+                            case 3: temp.getPiecesPositions().at(move[1]).setNamePiece("knight"); break;
                         }
+                        cout<<"16"<<endl;
+                        eval = temp.minimax(aiPlayer, opponent, depth - 1, true);
+                        cout<<"17"<<endl;
+                        minEval = min(minEval, eval);
                     }
-                    if (row == 7 && colorHumanPlayer=="black"){
-                        temp.getPiecesPositions().at(move[1]).setIsPromoted(true);
-                        for(int i=0; i<4; i++){
-                            switch(i){
-                                case 0:
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("queen");
-                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1,true);
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
-                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
-                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
-                                    break;
-                                case 1:
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("bishop");
-                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1,true);
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
-                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
-                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
-                                    break;
-                                case 2:
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("rook");
-                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1,true);
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
-                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
-                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
-                                    break;
-                                case 3:
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("knight");
-                                    int eval = temp.minimax(aiPlayer,opponent,depth - 1,true);
-                                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
-                                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
-                                    temp.undoMovePieceMini(move[1],move[0],capturedPiece);
-                                    break;
-                            }
-                        }
-                    }                        
-
+                    temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
+                    temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
+                    cout<<"18"<<endl;
+                    temp.undoMovePieceMini(move[1], move[0], capturedPiece);
+                    cout<<"19"<<endl;
+                } else {
+                    cout<<"20"<<endl;
+                    int eval = temp.minimax(aiPlayer, opponent, depth - 1, true);
+                    cout<<"21"<<endl;
+                    temp.undoMovePieceMini(move[1], move[0], capturedPiece);
+                    cout<<"22"<<endl;
+                    minEval = min(minEval, eval);
                 }
-
-                int eval = temp.minimax(aiPlayer,opponent,depth - 1,true);
-                temp.undoMovePieceMini(move[1],move[0],capturedPiece);
-                minEval = min(minEval, eval);
             }
         }
-
         return minEval;
     }
 }
@@ -1740,8 +1678,9 @@ int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizin
 vector<string> Board::findBestMove(Player aiPlayer, Player opponent, int depth) {
     int bestScore = INT_MIN;
     vector<string> bestMove;
-
+    cout<<"here"<<endl;
     vector<vector<string>> moves = getAllLegalMoves(aiPlayer, opponent);
+    cout<<"1"<<endl;
     string colorAIPlayer = aiPlayer.getColorPlayer();
 
     for (auto move : moves) {
@@ -1756,6 +1695,7 @@ vector<string> Board::findBestMove(Player aiPlayer, Player opponent, int depth) 
 
             // Check if promotion is possible
             auto& piece = temp.getPiecesPositions().at(move[1]);
+            cout<<"yolo"<<endl;
             if (piece.getNamePiece() == "pawn" && piece.getColorPiece() == colorAIPlayer) {
                 int row = piece.getCaseCoordinate()[0];
 
@@ -1785,7 +1725,9 @@ vector<string> Board::findBestMove(Player aiPlayer, Player opponent, int depth) 
         }
 
         // Regular move evaluation
+        cout<<"one"<<endl;
         int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
+        cout<<"more"<<endl;
         if (score > bestScore) {
             bestScore = score;
             bestMove = move;
@@ -1795,60 +1737,76 @@ vector<string> Board::findBestMove(Player aiPlayer, Player opponent, int depth) 
     return bestMove;
 }
 
-vector<vector<string>> Board::getAllLegalMoves(Player currentPlayer,Player adverser){
-
-    string colorPlayer=currentPlayer.getColorPlayer();
+vector<vector<string>> Board::getAllLegalMoves(Player currentPlayer, Player adverser) {
+    string colorPlayer = currentPlayer.getColorPlayer();
     vector<vector<string>> allMoves;
 
-    for(auto p : piecesPositions){
-        Piece& piece=p.second;
-        string name=piece.getNamePiece();
-        string start=piece.getCasePiece();
-        string color=piece.getColorPiece();
+    for (auto p : piecesPositions) {
+        Piece& piece = p.second;
+        string start = piece.getCasePiece();
+        string color = piece.getColorPiece();
+        string name = piece.getNamePiece();
 
-        if(color==colorPlayer){
-            for(int i=0; i<grid.size(); i++){
-                for(int j=0; j<grid[0].size(); j++){
-                    vector<int> coord={i,j};
-                    string end=generateNameCase(coord);
-    
-                    if(piece.isMoveLegal(coord) && (piece.getNamePiece()=="knight" || isPathClear(start,end))){
-                        allMoves.push_back({start,end});
-                    }
+        if (color != colorPlayer) continue;
 
-                    if(piece.getNamePiece()=="pawn" && piece.pawnCapture(coord)){
-                        allMoves.push_back({start,end});
-                    }
+        for (int i = 0; i < grid.size(); i++) {
+            for (int j = 0; j < grid[0].size(); j++) {
+                vector<int> coord = {i, j};
+                string end = generateNameCase(coord);
 
-                    if(isEnPassant(currentPlayer,adverser,start,end)){
-                        allMoves.push_back({start,end});
+                // Make sure we don't generate moves to the same square
+                if (start == end) continue;
+
+                // Check move legality and path clearance (except for knight)
+                if (piece.isMoveLegal(coord) &&
+                    (name == "knight" || isPathClear(start, end))) {
+
+                    // Defensive check: ensure the source is still valid
+                    if (piecesPositions.count(start)) {
+                        allMoves.push_back({start, end});
                     }
+                }
+
+                // Handle pawn captures (only diagonal and if a real capture exists)
+                if (name == "pawn" && piece.pawnCapture(coord)) {
+                    if (piecesPositions.count(end) && piecesPositions.at(end).getColorPiece() != color) {
+                        allMoves.push_back({start, end});
+                    }
+                }
+
+                // Handle en passant
+                if (isEnPassant(currentPlayer, adverser, start, end)) {
+                    allMoves.push_back({start, end});
                 }
             }
-            if(isKingsideCastlingPossible(currentPlayer)){
-                if(colorPlayer=="white"){
-                    allMoves.push_back({"e1","g1","h1","f1"});
-                }
-                if(colorPlayer=="black"){
-                    allMoves.push_back({"e8","g8","h8","f8"});
-                }
-            }
-            if(isQueensideCastlingPossible(currentPlayer)){
-                if(colorPlayer=="white"){
-                    allMoves.push_back({"e1","c1","a1","d1"});
-                }
-                if(colorPlayer=="black"){
-                    allMoves.push_back({"e8","c8","a8","d8"});
+        }
+
+        // Handle castling
+        if (name == "king") {
+            if (isKingsideCastlingPossible(currentPlayer)) {
+                if (colorPlayer == "white") {
+                    allMoves.push_back({"e1", "g1", "h1", "f1"});
+                } else if (colorPlayer == "black") {
+                    allMoves.push_back({"e8", "g8", "h8", "f8"});
                 }
             }
-        }        
+            if (isQueensideCastlingPossible(currentPlayer)) {
+                if (colorPlayer == "white") {
+                    allMoves.push_back({"e1", "c1", "a1", "d1"});
+                } else if (colorPlayer == "black") {
+                    allMoves.push_back({"e8", "c8", "a8", "d8"});
+                }
+            }
+        }
     }
+
     return allMoves;
 }
 
+
 int Board::playerTurnAI(Player aiPlayer,Player adverser){
     int t;
-    cout<<"\nAI's turn....\n"<<endl;
+    cout<<"\nAI's turn....\n"<<endl;//until here
     t=makeAMoveAI(aiPlayer,adverser);
     return t;
 }
@@ -1919,7 +1877,9 @@ int Board::gameLogicAI(Player humanPlayer,Player aiPlayer){
 }
 
 int Board::makeAMoveAI(Player aiPlayer,Player adverser){
-    vector<string> move = findBestMove(aiPlayer,adverser,10);
+    cout<<"cou"<<endl;
+    vector<string> move = findBestMove(aiPlayer,adverser,2);//pb here
+    cout<<"coucou"<<endl;
     string playerColor=aiPlayer.getColorPlayer();   
 
     if(move.size()==2){//simple move, with capture or en passant (pawn)
@@ -2046,23 +2006,19 @@ int Board::makeAMoveAI(Player aiPlayer,Player adverser){
     return 1;
 }
 
-
 /*int main(){
 
     Board b;
     b.initiateBoard();
     cout<<"row :"<<b.getBoard().size()<<endl;
     cout<<"column : "<<b.getBoard()[0].size()<<endl;
-    //b.printBoard();
+    b.printBoard();
 
     Player p1("white");
     Player p2("black");
 
-    int t=5;
-
-    while(t==5){
-        t=b.gameLogic(p1,p2);
-    }
+    int t=b.playerTurnAI(p2,p1);
+    b.printBoard();
     
 }*/
     

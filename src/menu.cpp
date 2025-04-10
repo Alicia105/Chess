@@ -31,7 +31,7 @@ int chooseOpponent(){
         cout<<"Please enter a valid option (1 or 2):"<<endl;
         cin>>x;
     }
-   
+    cin.ignore();
     return x;
 } 
 
@@ -60,7 +60,7 @@ int main(){
 
     if(c==1){
         int t=5;
-
+        cout<<"You chose to play againt a human.\n"<<endl;
         while(t==5){
             t=b.gameLogic(p1,p2);
             /*if(b.isGameOver(p1,p2)){
@@ -81,6 +81,7 @@ int main(){
 
     }
     if(c==2){
+        cout<<"You chose to play againt AI.\n"<<endl;
         int t=5;
 
         while(t==5){
