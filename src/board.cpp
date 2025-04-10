@@ -1521,7 +1521,6 @@ void Board::movePieceMini(string from, string to, Piece* capturedPiece) {
     piecesPositions.erase(from);
 }
 
-
 void Board::undoMovePieceMini(string from, string to, Piece& capturedPiece){
     // Undo the move by restoring the piece that was moved
     piecesPositions[from] = piecesPositions[to];  // Move the piece back to the original position
@@ -1535,13 +1534,25 @@ void Board::undoMovePieceMini(string from, string to, Piece& capturedPiece){
     }
 }
 
+//int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizingPlayer, int alpha, int beta)
 int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizingPlayer) {
+    cout<<"debut"<<endl;
     string colorAIPlayer = aiPlayer.getColorPlayer();
     string colorHumanPlayer = opponent.getColorPlayer();
+    cout<<"nous"<<endl;
 
-    if (depth == 0 || isGameOver(aiPlayer, opponent)) {
-        return evaluate(aiPlayer, opponent);
+    //cout << "Depth: " << depth << ", Game over: " << isGameOver(aiPlayer, opponent) << endl;
+
+    if (depth == 0) {
+        int eval= evaluate(aiPlayer, opponent);
+        cout << "Base case reached with evaluation: " << eval << endl;
+        return eval;
     }
+    /*if (depth == 0||isGameOver(aiPlayer, opponent)) {
+        int eval= evaluate(aiPlayer, opponent);
+        cout << "Base case reached with evaluation: " << eval << endl;
+        return eval;
+    }*///->pb with isGameOver
     cout<<"Allons"<<endl;
 
     if (isMaximizingPlayer) {
@@ -1559,6 +1570,7 @@ int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizin
                 cout<<"1"<<endl;
 
                 int eval = temp.minimax(aiPlayer, opponent, depth - 1, false);
+                //int eval = temp.minimax(aiPlayer, opponent, depth - 1, false, alpha, beta);
                 cout<<"2"<<endl;
 
                 temp.movePiece(move[1], move[0]);
@@ -1566,6 +1578,11 @@ int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizin
                 cout<<"3"<<endl;
 
                 maxEval = max(maxEval, eval);
+                /*alpha = max(alpha, eval);
+                if (beta <= alpha){
+                    break;  // beta cut-off
+                }*/
+                    
             } else {
                 cout<<"4"<<endl;
                 cout << "Trying move from " << move[0] << " to " << move[1] << endl;
@@ -1592,8 +1609,14 @@ int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizin
                             case 3: temp.getPiecesPositions().at(move[1]).setNamePiece("knight"); break;
                         }
                         eval = temp.minimax(aiPlayer, opponent, depth - 1, false);
+                        //eval = temp.minimax(aiPlayer, opponent, depth - 1, false, alpha, beta);
                         cout<<"6"<<endl;
                         maxEval = max(maxEval, eval);
+                        /*alpha = max(alpha, eval);
+                        if (beta <= alpha){
+                            break;  // beta cut-off
+                        }*/
+                        
                     }
                     temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
                     temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
@@ -1602,10 +1625,15 @@ int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizin
                     cout<<"8"<<endl;
                 } else {
                     int eval = temp.minimax(aiPlayer, opponent, depth - 1, false);
+                    //int eval = temp.minimax(aiPlayer, opponent, depth - 1, false, alpha, beta);
                     cout<<"9"<<endl;
                     temp.undoMovePieceMini(move[1], move[0], capturedPiece);
                     cout<<"10"<<endl;
                     maxEval = max(maxEval, eval);
+                    /*alpha = max(alpha, eval);
+                    if (beta <= alpha){
+                        break;  // beta cut-off
+                    }*/
                 }
             }
         }
@@ -1625,12 +1653,18 @@ int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizin
                 cout<<"11"<<endl;
 
                 int eval = temp.minimax(aiPlayer, opponent, depth - 1, true);
+                //int eval = temp.minimax(aiPlayer, opponent, depth - 1, true, alpha, beta);
                 cout<<"12"<<endl;
 
                 temp.movePiece(move[1], move[0]);
                 temp.movePiece(move[3], move[2]);
 
                 minEval = min(minEval, eval);
+                /*beta = min(beta, eval);
+                if (beta <= alpha){
+                    break;  // alpha cut-off
+                }*/
+        
             } else {
                 cout<<"13"<<endl;
                 temp.movePieceMini(move[0], move[1], &capturedPiece);
@@ -1653,8 +1687,13 @@ int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizin
                         }
                         cout<<"16"<<endl;
                         eval = temp.minimax(aiPlayer, opponent, depth - 1, true);
+                        //eval = temp.minimax(aiPlayer, opponent, depth - 1, true, alpha, beta);
                         cout<<"17"<<endl;
                         minEval = min(minEval, eval);
+                        /*beta = min(beta, eval);
+                        if (beta <= alpha){
+                            break;  // alpha cut-off
+                        }*/
                     }
                     temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
                     temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
@@ -1664,10 +1703,15 @@ int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizin
                 } else {
                     cout<<"20"<<endl;
                     int eval = temp.minimax(aiPlayer, opponent, depth - 1, true);
+                    //int eval = temp.minimax(aiPlayer, opponent, depth - 1, true, alpha, beta);
                     cout<<"21"<<endl;
                     temp.undoMovePieceMini(move[1], move[0], capturedPiece);
                     cout<<"22"<<endl;
                     minEval = min(minEval, eval);
+                    /*beta = min(beta, eval);
+                    if (beta <= alpha){
+                        break;  // alpha cut-off
+                    }*/
                 }
             }
         }
@@ -1675,6 +1719,7 @@ int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizin
     }
 }
 
+//vector<string> Board::findBestMove(Player aiPlayer, Player opponent, int depth,int alpha, int beta) 
 vector<string> Board::findBestMove(Player aiPlayer, Player opponent, int depth) {
     int bestScore = INT_MIN;
     vector<string> bestMove;
@@ -1709,6 +1754,7 @@ vector<string> Board::findBestMove(Player aiPlayer, Player opponent, int depth) 
                     for (const string& promo : promotionPieces) {
                         piece.setNamePiece(promo);
                         int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
+                        //int score = temp.minimax(aiPlayer, opponent, depth - 1, false,alpha,beta);
 
                         if (score > bestScore) {
                             bestScore = score;
@@ -1716,6 +1762,11 @@ vector<string> Board::findBestMove(Player aiPlayer, Player opponent, int depth) 
                             promotedMove.push_back(promo);
                             bestMove = promotedMove;
                         }
+                        /*// Alpha-Beta Pruning
+                        alpha = max(alpha, bestScore);
+                        if (beta <= alpha) {
+                            break;  // Cut-off if beta is smaller or equal to alpha
+                        }*/
                     }
 
                     // Skip regular minimax call after promotion
@@ -1727,11 +1778,18 @@ vector<string> Board::findBestMove(Player aiPlayer, Player opponent, int depth) 
         // Regular move evaluation
         cout<<"one"<<endl;
         int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
+        //int score = temp.minimax(aiPlayer, opponent, depth - 1, false, alpha, beta);
         cout<<"more"<<endl;
         if (score > bestScore) {
             bestScore = score;
             bestMove = move;
         }
+
+        /*// Alpha-Beta Pruning
+        alpha = max(alpha, bestScore);
+        if (beta <= alpha) {
+            break;  // Cut-off if beta is smaller or equal to alpha
+        }*/
     }
 
     return bestMove;
@@ -1802,7 +1860,6 @@ vector<vector<string>> Board::getAllLegalMoves(Player currentPlayer, Player adve
 
     return allMoves;
 }
-
 
 int Board::playerTurnAI(Player aiPlayer,Player adverser){
     int t;
@@ -1878,7 +1935,8 @@ int Board::gameLogicAI(Player humanPlayer,Player aiPlayer){
 
 int Board::makeAMoveAI(Player aiPlayer,Player adverser){
     cout<<"cou"<<endl;
-    vector<string> move = findBestMove(aiPlayer,adverser,2);//pb here
+    vector<string> move = findBestMove(aiPlayer,adverser,2);
+    //vector<string> move = findBestMove(aiPlayer,adverser,2,INT_MIN, INT_MAX);//pb here
     cout<<"coucou"<<endl;
     string playerColor=aiPlayer.getColorPlayer();   
 

@@ -74,8 +74,10 @@ class Board{
     void movePieceMini(std::string from, std::string to,Piece* capturedPiece = nullptr);
     void undoMovePieceMini(std::string from, std::string to,Piece& capturedPiece);
     int minimax(Player aiPlayer, Player humanPlayer, int depth, bool isMaximizing);
+    //int minimax(Player aiPlayer, Player humanPlayer, int depth, bool isMaximizing, int alpha, int beta);
     std::vector<std::vector<std::string>> getAllLegalMoves(Player currentPlayer,Player adverser);
     std::vector<std::string> findBestMove(Player aiPlayer, Player opponent, int depth);
+    //std::vector<std::string> findBestMove(Player aiPlayer, Player opponent, int depth,int alpha, int beta);
     int playerTurnAI(Player humanPlayer,Player aiPlayer);
     int gameLogicAI(Player humanPlayer,Player aiPlayer);
     int makeAMoveAI(Player aiPlayer,Player adverser);
