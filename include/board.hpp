@@ -43,6 +43,7 @@ class Board{
     void printBoard();//good
 
     //for game logic
+    void printScore();
     void updateScore(Player p);//good
     bool isKingsideCastlingPossible(Player currentPlayer);//good
     bool isQueensideCastlingPossible(Player currentPlayer);//good
@@ -70,11 +71,14 @@ class Board{
     //for ai
     bool isGameOver(Player aiPlayer, Player opponent);
     int evaluate(Player& aiPlayer, Player& humanPlayer);
-    void movePieceMini(string from, string to,Piece* capturedPiece = nullptr);
-    void undoMovePieceMini(string from, string to,Piece& capturedPiece);
+    void movePieceMini(std::string from, std::string to,Piece* capturedPiece = nullptr);
+    void undoMovePieceMini(std::string from, std::string to,Piece& capturedPiece);
     int minimax(Player aiPlayer, Player humanPlayer, int depth, bool isMaximizing);
     std::vector<std::vector<std::string>> getAllLegalMoves(Player currentPlayer,Player adverser);
-    vector<string> findBestMove(Player aiPlayer, Player opponent, int depth);
+    std::vector<std::string> findBestMove(Player aiPlayer, Player opponent, int depth);
+    int playerTurnAI(Player humanPlayer,Player aiPlayer);
+    int gameLogicAI(Player humanPlayer,Player aiPlayer);
+    int makeAMoveAI(Player aiPlayer,Player adverser);
     
 };
 

@@ -63,6 +63,9 @@ int main(){
 
         while(t==5){
             t=b.gameLogic(p1,p2);
+            /*if(b.isGameOver(p1,p2)){
+                b.printScore();
+            }*/           
         }
 
         if(t==7){
@@ -78,6 +81,22 @@ int main(){
 
     }
     if(c==2){
+        int t=5;
+
+        while(t==5){
+            t=b.gameLogicAI(p1,p2);
+            if(b.isGameOver(p1,p2)){
+                b.printScore();
+            }
+        }
+
+        if(t==7){
+            cout<<"Your game was successfully saved !"<<endl;
+        }
+
+        if(t==4){
+            cout<<"Error: Unexpected internal error"<<endl;
+        }
 
         printBye();
         return 0;

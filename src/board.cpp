@@ -313,6 +313,10 @@ void Board::updateScore(Player p){
     }
 }
 
+void Board::printScore(){
+    cout<<"Final score : Player 1 : "<<scorePlayer1<<" - "<<"Player 2 : "<<scorePlayer2<<endl;
+}
+
 //good
 bool Board::isKingsideCastlingPossible(Player currentPlayer) {
 
@@ -1332,7 +1336,7 @@ int Board::playerExit(){
     return 0;
 }
 
-void Board::movePiece(string from, string to) {
+void Board::movePiece(string from, string to){
     // If there is a piece at the "to" position, temporarily remove it
     bool captured = piecesPositions.count(to);
     Piece capturedPiece;
@@ -1371,7 +1375,7 @@ int Board::gameLogic(Player player1,Player player2){
             return t;
         }
 
-        //to fix
+       
         while(n==0){
             n=playerExit();
             if(n==0){
@@ -1451,7 +1455,7 @@ int Board::playerTurn(Player currentPlayer,Player adverser){
 //for ai game logic--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 bool Board::isGameOver(Player aiPlayer, Player opponent){
-    return isCheckMate(aiPlayer)|| isCheckMate(opponent);
+    return isCheckMate(aiPlayer)|| isCheckMate(opponent)||isStaleMate(aiPlayer);
 }
 
 int Board::evaluate(Player& aiPlayer, Player& opponent){
@@ -1484,13 +1488,10 @@ int Board::evaluate(Player& aiPlayer, Player& opponent){
     return score;
 }
 
-void Board::movePieceMini(string from, string to, Piece* capturedPiece = nullptr){
-    // If there is a piece at the "to" position, temporarily remove it
-    bool captured = piecesPositions.count(to);
-    Piece capturedPiece;
-    if (captured) {
-        *capturedPiece = piecesPositions.at(to);
-        piecesPositions.erase(to);
+void Board::movePieceMini(string from, string to, Piece* capturedPiece) {
+    // Check if there's a piece to capture
+    if (piecesPositions.count(to) && capturedPiece != nullptr) {
+        *capturedPiece = piecesPositions.at(to); // Store the captured piece in the pointer
     }
 
     // Move the piece
@@ -1498,8 +1499,6 @@ void Board::movePieceMini(string from, string to, Piece* capturedPiece = nullptr
     piecesPositions[to].setCasePiece(to);
     piecesPositions[to].setCaseCoordinate(generateCaseCoordinates(to));
     piecesPositions.erase(from);
-
-    // If this was a simulation, you could restore the captured piece
 }
 
 void Board::undoMovePieceMini(string from, string to, Piece& capturedPiece){
@@ -1738,130 +1737,55 @@ int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizin
     }
 }
 
-vector<string> Board::findBestMove(Player aiPlayer, Player opponent, int depth){
+vector<string> Board::findBestMove(Player aiPlayer, Player opponent, int depth) {
     int bestScore = INT_MIN;
     vector<string> bestMove;
 
-    vector<vector<string>> moves = getAllLegalMoves(aiPlayer,opponent);
-    string colorAIPlayer=aiPlayer.getColorPlayer();
-    for ( auto move : moves){
+    vector<vector<string>> moves = getAllLegalMoves(aiPlayer, opponent);
+    string colorAIPlayer = aiPlayer.getColorPlayer();
+
+    for (auto move : moves) {
         Board temp = *this;
-        if(move.size()==4){
-            //castling case--> no capture
-            temp.movePiece(move[0],move[1]);
-            temp.movePiece(move[2],move[3]);
-        }
-        else{
-            temp.movePiece(move[0],move[1]);
-            if (temp.getPiecesPositions().at(move[1]).getNamePiece() == "pawn" && temp.getPiecesPositions().at(move[1]).getColorPiece()==colorAIPlayer) {
-                int row=temp.getPiecesPositions().at(move[1]).getCaseCoordinate()[0];
-                if (row == 0 && colorAIPlayer=="white"){
-                    temp.getPiecesPositions().at(move[1]).setIsPromoted(true);
-                    for(int i=0; i<4; i++){
-                        switch(i){
-                            case 0:
-                                temp.getPiecesPositions().at(move[1]).setNamePiece("queen");
-                                int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
 
-                                if (score > bestScore) {
-                                    bestScore = score;
-                                    move.push_back("queen");
-                                    bestMove = move;
-                                }
-                                
-                                break;
-                            case 1:
-                                temp.getPiecesPositions().at(move[1]).setNamePiece("bishop");
-                                int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
+        // Handle castling (4-part move)
+        if (move.size() == 4) {
+            temp.movePiece(move[0], move[1]);
+            temp.movePiece(move[2], move[3]);
+        } else {
+            temp.movePiece(move[0], move[1]);
 
-                                if (score > bestScore) {
-                                    bestScore = score;
-                                    move.push_back("bishop");
-                                    bestMove = move;
-                                }
-                              
-                                break;
-                            case 2:
-                                temp.getPiecesPositions().at(move[1]).setNamePiece("rook");
-                                int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
+            // Check if promotion is possible
+            auto& piece = temp.getPiecesPositions().at(move[1]);
+            if (piece.getNamePiece() == "pawn" && piece.getColorPiece() == colorAIPlayer) {
+                int row = piece.getCaseCoordinate()[0];
 
-                                if (score > bestScore) {
-                                    bestScore = score;
-                                    move.push_back("rook");
-                                    bestMove = move;
-                                }
-                               
-                                break;
-                            case 3:
-                                temp.getPiecesPositions().at(move[1]).setNamePiece("knight");
-                                int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
+                bool isPromotion = (row == 0 && colorAIPlayer == "white") || 
+                                   (row == 7 && colorAIPlayer == "black");
 
-                                if (score > bestScore) {
-                                    bestScore = score;
-                                    move.push_back("knight");
-                                    bestMove = move;
-                                }
-                               
-                                break;
+                if (isPromotion) {
+                    piece.setIsPromoted(true);
+                    vector<string> promotionPieces = {"queen", "bishop", "rook", "knight"};
+
+                    for (const string& promo : promotionPieces) {
+                        piece.setNamePiece(promo);
+                        int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
+
+                        if (score > bestScore) {
+                            bestScore = score;
+                            vector<string> promotedMove = move;
+                            promotedMove.push_back(promo);
+                            bestMove = promotedMove;
                         }
                     }
-                }
-                if (row == 7 && colorAIPlayer=="black"){
-                    temp.getPiecesPositions().at(move[1]).setIsPromoted(true);
-                    for(int i=0; i<4; i++){
-                        switch(i){
-                            case 0:
-                                temp.getPiecesPositions().at(move[1]).setNamePiece("queen");
-                                int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
 
-                                if (score > bestScore) {
-                                    bestScore = score;
-                                    move.push_back("queen");
-                                    bestMove = move;
-                                }
-                               
-                                break;
-                            case 1:
-                                temp.getPiecesPositions().at(move[1]).setNamePiece("bishop");
-                                int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
-
-                                if (score > bestScore) {
-                                    bestScore = score;
-                                    move.push_back("bishop");
-                                    bestMove = move;
-                                }
-                              
-                                break;
-                            case 2:
-                                temp.getPiecesPositions().at(move[1]).setNamePiece("rook");
-                                int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
-
-                                if (score > bestScore) {
-                                    bestScore = score;
-                                    move.push_back("rook");
-                                    bestMove = move;
-                                }
-                               
-                                break;
-                            case 3:
-                                temp.getPiecesPositions().at(move[1]).setNamePiece("knight");
-                                int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
-
-                                if (score > bestScore) {
-                                    bestScore = score;
-                                    move.push_back("knight");
-                                    bestMove = move;
-                                }
-                              
-                                break;
-                        }
-                    }
+                    // Skip regular minimax call after promotion
+                    continue;
                 }
             }
         }
 
+        // Regular move evaluation
         int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
-
         if (score > bestScore) {
             bestScore = score;
             bestMove = move;
@@ -1921,6 +1845,207 @@ vector<vector<string>> Board::getAllLegalMoves(Player currentPlayer,Player adver
     }
     return allMoves;
 }
+
+int Board::playerTurnAI(Player aiPlayer,Player adverser){
+    int t;
+    cout<<"\nAI's turn....\n"<<endl;
+    t=makeAMoveAI(aiPlayer,adverser);
+    return t;
+}
+
+int Board::gameLogicAI(Player humanPlayer,Player aiPlayer){
+    int n=0;
+    int t=0;
+    if(numberOfTurn==0){
+        if(humanPlayer.getColorPlayer()=="white"){
+            cout<<"You're the one to start player 1.\n"<<endl;
+            //player1 play
+            t=playerTurn(humanPlayer,aiPlayer);
+            if(t==4){
+                return t;
+            }
+        }
+
+        //AI play
+        t=playerTurnAI(aiPlayer,humanPlayer);
+
+        //AI internal mistake
+        if(t==1){
+            return t=4;
+        }
+       
+        numberOfTurn++;
+        cout<<"\nNumber of Turn : "<<getNumberOfTurn()<<"\n"<<endl;
+       
+       
+        while(n==0){
+            n=playerExit();
+            if(n==0){
+                cout<<"Please enter a valid option"<<endl;
+            }
+        }
+           
+        return n;
+    }
+
+    t=playerTurn(humanPlayer,aiPlayer);
+
+    //player1 is checkmate or we have a stalemate
+    if(t==2 || t==3){
+        return t;
+    }
+
+    if(t==4){
+        return t;
+    }
+
+    //AI play
+    t=playerTurnAI(aiPlayer,humanPlayer);
+    numberOfTurn++;
+    cout<<"\nNumber of Turn : "<<getNumberOfTurn()<<endl;
+
+    //AI internal mistake
+   
+    if(t==1){
+        return t=4;
+    }
+    
+    while(n==0){
+        n=playerExit();
+        cout<<"Please enter a valid option"<<endl;
+    }
+    
+    return n;
+}
+
+int Board::makeAMoveAI(Player aiPlayer,Player adverser){
+    vector<string> move = findBestMove(aiPlayer,adverser,10);
+    string playerColor=aiPlayer.getColorPlayer();   
+
+    if(move.size()==2){//simple move, with capture or en passant (pawn)
+        Piece& p=piecesPositions.at(move[0]);
+        int t=0;
+
+        if(piecesPositions.count(move[1]) && piecesPositions.at(move[1]).getColorPiece()==adverser.getColorPlayer()){
+            Piece& captured=piecesPositions.at(move[1]);
+            captured.setIsCaptured(true);
+            aiPlayer.getCapturedPieces().push_back(captured);
+    
+            piecesPositions.erase(move[1]);
+            adverser.getPlayerPiecesPositions().erase(move[1]);
+            t=1;
+        }
+
+        if(isEnPassant(aiPlayer,adverser,move[0],move[1]) && t!=1){
+            vector<int> endCapture=generateCaseCoordinates(move[1]);
+            int row=endCapture[0];
+            int col=endCapture[1];
+
+            if(playerColor=="white"){
+                vector<int> coordCapture={row+1,col};
+                string capturePosition=generateNameCase(coordCapture);
+
+                Piece& captured=piecesPositions.at(capturePosition);
+                captured.setIsCaptured(true);
+                aiPlayer.getCapturedPieces().push_back(captured);
+        
+                piecesPositions.erase(capturePosition);
+                adverser.getPlayerPiecesPositions().erase(capturePosition);
+
+            }
+            if(playerColor=="black"){
+                vector<int> coordCapture={row-1,col};
+                string capturePosition=generateNameCase(coordCapture);
+
+                Piece& captured=piecesPositions.at(capturePosition);
+                captured.setIsCaptured(true);
+                aiPlayer.getCapturedPieces().push_back(captured);
+        
+                piecesPositions.erase(capturePosition);
+                adverser.getPlayerPiecesPositions().erase(capturePosition);
+            }         
+        }
+
+        p.setLastMove(move[0]);
+        p.setCasePiece(move[1]);
+       
+        p.setCaseCoordinate(generateCaseCoordinates(move[1]));
+        p.wasMoved();
+        
+        // Move the pieces
+        piecesPositions[move[1]]=p;
+        aiPlayer.getPlayerPiecesPositions()[move[1]]=p;
+      
+        piecesPositions.erase(move[0]);
+        aiPlayer.getPlayerPiecesPositions().erase(move[0]);
+        aiPlayer.playedAMove();
+        return 0;
+    }
+
+    if(move.size()==3){//promotion & capture
+        Piece& p=piecesPositions.at(move[0]);
+
+        p.setLastMove(move[0]);
+        p.setCasePiece(move[1]);
+        p.setNamePiece(move[2]);
+        p.setCaseCoordinate(generateCaseCoordinates(move[1]));
+        p.wasMoved();
+
+        if(piecesPositions.count(move[1]) && piecesPositions.at(move[1]).getColorPiece()==adverser.getColorPlayer()){
+            Piece& captured=piecesPositions.at(move[1]);
+            captured.setIsCaptured(true);
+            aiPlayer.getCapturedPieces().push_back(captured);
+    
+            piecesPositions.erase(move[1]);
+            adverser.getPlayerPiecesPositions().erase(move[1]);
+
+        }
+
+        // Move the pieces
+        piecesPositions[move[1]]=p;
+        aiPlayer.getPlayerPiecesPositions()[move[1]]=p;
+      
+        piecesPositions.erase(move[0]);
+        aiPlayer.getPlayerPiecesPositions().erase(move[0]);
+        aiPlayer.playedAMove();
+        return 0;
+        
+    }
+
+    if(move.size()==4){//castling 
+        Piece& k=piecesPositions.at(move[0]);
+        Piece& r=piecesPositions.at(move[2]);
+
+        k.setLastMove(move[0]);
+        k.setCasePiece(move[1]);
+        k.setCaseCoordinate(generateCaseCoordinates(move[1]));
+        k.wasMoved();
+
+        r.setLastMove(move[2]);
+        r.setCasePiece(move[3]);
+        r.setCaseCoordinate(generateCaseCoordinates(move[3]));
+        r.wasMoved();
+
+
+        // Move the pieces
+        piecesPositions[move[1]]=k;
+        piecesPositions[move[3]]=r;
+
+        aiPlayer.getPlayerPiecesPositions()[move[1]]=k;
+        aiPlayer.getPlayerPiecesPositions()[move[3]]=r;     
+
+        piecesPositions.erase(move[0]);
+        piecesPositions.erase(move[2]);
+
+        aiPlayer.getPlayerPiecesPositions().erase(move[0]);
+        aiPlayer.getPlayerPiecesPositions().erase(move[2]);
+        aiPlayer.playedAMove();
+        return 0;
+        
+    }
+    return 1;
+}
+
 
 /*int main(){
 
