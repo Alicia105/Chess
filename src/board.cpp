@@ -757,12 +757,19 @@ bool Board::isKingUnderAttack(Player p,string kingPosition){
         return false;
     }
 
+    vector<int> endCoord = generateCaseCoordinates(kingPosition);
+
     // Check if any opponent piece can attack the king
     for (auto piece : piecesPositions) {
         if (piece.second.getColorPiece() != kingColor) {
-            vector<int> endCoord = generateCaseCoordinates(kingPosition);
-            if (piece.second.isMoveLegal(endCoord) &&
-                (piece.second.getNamePiece() == "knight" || isPathClear(piece.first, kingPosition))){
+            string start =piece.first;
+            if (!piece.second.isMoveLegal(endCoord)) continue;
+            
+            if (piece.second.getNamePiece() == "knight"){
+                return true; // King is under attack
+            }
+
+            if (isPathClear(start, kingPosition)){
                 return true; // King is under attack
             }
         }
@@ -776,20 +783,24 @@ bool Board::isCheckMate(Player p){
 
     // Find the king's position
     string kingPosition=getKingPosition(p);
-    //cout<<kingPosition<<endl;
+    cout<<"kingPo : "<<kingPosition<<endl;
 
     //Should never happen
     if (kingPosition.empty()){
         cout << "Error: King not found!" << endl;
         return false;
     }
-    
+    cout<<"yahoo"<<endl;
+
     if (!isKingUnderAttack(p,kingPosition)) {
+        cout<<"hello"<<endl;
         return false; // Not in check, so not checkmate
     }
+    cout<<"belbe"<<endl;
     //cout<<"is in check"<<endl;
 
     string kingColor=p.getColorPlayer();
+    cout<<kingColor<<endl;
 
     // Define possible king moves
     vector<pair<int, int>> moves = {
@@ -800,9 +811,12 @@ bool Board::isCheckMate(Player p){
     vector<int> kingCoord=generateCaseCoordinates(kingPosition);
     vector<string> attackers=findKingAttackers(p);
 
+    cout<<"colombe"<<endl;
+
     //Check if the king has an escape move
     // Iterate through possible moves
     for (auto move : moves) {
+        int i=0;
         int newX = kingCoord[0] + move.first;
         int newY = kingCoord[1] + move.second;
         vector<int> endCoord={newX,newY};
@@ -810,41 +824,58 @@ bool Board::isCheckMate(Player p){
 
         if (endCoord[0] >= 0 && endCoord[0] < 8 && endCoord[1] >= 0 && endCoord[1] < 8) { // Check board limits
             string newPosition = generateNameCase(endCoord);
-            //cout<<"new position :"<<newPosition<<endl;
+            cout<<"new position :"<<newPosition<<endl;
 
             // If the square is not occupied by the same color and doesn't put king in check, it's a valid escape
-            if ((!piecesPositions.count(newPosition) || piecesPositions.at(newPosition).getColorPiece() != kingColor) &&
-                !isKingUnderAttack(p,newPosition)) {
-                //cout<<"here"<<endl;
-                return false; // King has an escape move, so it's not checkmate
+            if (!piecesPositions.count(newPosition) || piecesPositions.at(newPosition).getColorPiece() != kingColor){
+                // Simulate king move on a copy of the board
+                Board tempBoard = *this;
+                tempBoard.movePiece(kingPosition, newPosition);
+
+                if (!tempBoard.isKingUnderAttack(p, newPosition)) {
+                    cout<<"ds:" <<i<<endl;
+                    return false; // King has an escape move, so it's not checkmate
+                }
             }
         }
     }
 
-    //Can Attacker be aptured or blocked
-    for(auto attackerPosition: attackers){
+    //Can Attacker be captured or blocked
+    // Try capturing or blocking the attacker
+    for (auto attackerPosition : attackers) {
+        vector<int> attackCoord = generateCaseCoordinates(attackerPosition);
+        vector<vector<int>> pathToKing = getPath(attackCoord, kingCoord);
+
         for (auto pc : piecesPositions) {
-            if (pc.second.getColorPiece() == kingColor && pc.second.getNamePiece()!="king") { // Friendly piece which is not the king
-                vector<int> attackCoord = generateCaseCoordinates(attackerPosition);
-                // Get the path from attacker to king (for blocking)
-                vector<vector<int>> pathToKing = getPath(attackCoord, kingCoord);
+            if (pc.second.getColorPiece() == kingColor && pc.second.getNamePiece() != "king") {
+                string piecePosition = pc.first;
 
-                if (pc.second.isMoveLegal(attackCoord) && pc.second.getNamePiece()=="knight"){
-                    return false; // A knight can capture the attacker -> No checkmate
+                // Attempt to capture the attacker
+                if (pc.second.isMoveLegal(attackCoord) && 
+                    (pc.second.getNamePiece() == "knight" || isPathClear(piecePosition, attackerPosition))) {
+                    // Simulate the capture
+                    Board tempBoard = *this;
+                    tempBoard.movePiece(piecePosition, attackerPosition);
+                    if (!tempBoard.isKingUnderAttack(p, kingPosition)) {
+                        return false; // Attacker can be captured => no checkmate
+                    }
                 }
 
-                if (pc.second.isMoveLegal(attackCoord) && isPathClear(pc.second.getCasePiece(), attackerPosition)){
-                    return false; // A piece can capture the attacker -> No checkmate
-                }
-
+                // Attempt to block the attacker (not applicable for knights)
                 for (auto square : pathToKing) {
-                    if (pc.second.isMoveLegal(square) && isPathClear(pc.second.getCasePiece(), generateNameCase(square))) {
-                        return false; // A piece can block the attack -> No checkmate
+                    string blockSquare = generateNameCase(square);
+                    if (pc.second.isMoveLegal(square) && isPathClear(piecePosition, blockSquare)) {
+                        Board tempBoard = *this;
+                        tempBoard.movePiece(piecePosition, blockSquare);
+                        if (!tempBoard.isKingUnderAttack(p, kingPosition)) {
+                            return false; // Attack can be blocked => no checkmate
+                        }
                     }
                 }
             }
         }
     }
+
 
     // If no escape, block, or capture is possible, it's checkmate
     return true;
@@ -1454,8 +1485,8 @@ int Board::playerTurn(Player currentPlayer,Player adverser){
 
 //for ai game logic--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-bool Board::isGameOver(Player aiPlayer, Player opponent){
-    return isCheckMate(aiPlayer)|| isCheckMate(opponent)||isStaleMate(aiPlayer);
+bool Board::isGameOver(Player aiPlayer){
+    return isCheckMate(aiPlayer)|| isStaleMate(aiPlayer);
 }
 
 int Board::evaluate(Player& aiPlayer, Player& opponent){
@@ -1502,40 +1533,68 @@ int Board::evaluate(Player& aiPlayer, Player& opponent){
 }*/
 
 void Board::movePieceMini(string from, string to, Piece* capturedPiece) {
+    cout << "[DEBUG] movePieceMini: trying to move from " << from << " to " << to << endl;
+
+    // Prevent moving to the same square
+    if (from == to) {
+        cout << "[ERROR] Invalid move: source and destination are the same (" << from << ")" << endl;
+        return;
+    }
+
+    // Check if there's a piece at the source
     if (!piecesPositions.count(from)) {
-        cout << "Error: No piece at source square " << from << endl;
+        cout << "[ERROR] No piece at source square " << from << endl;
         return;
     }
 
     // Handle capture
     if (piecesPositions.count(to) && capturedPiece != nullptr) {
         *capturedPiece = piecesPositions.at(to);
+        capturedPiece->setLastMove(to);
+        capturedPiece->setIsCaptured(true);
     } else if (capturedPiece != nullptr) {
-        *capturedPiece = Piece(); // default
+        *capturedPiece = Piece(); // default empty piece
     }
 
     // Move piece
     piecesPositions[to] = piecesPositions.at(from);
     piecesPositions[to].setCasePiece(to);
     piecesPositions[to].setCaseCoordinate(generateCaseCoordinates(to));
+    piecesPositions[to].setLastMove(from);
+
+    // Remove from original square
     piecesPositions.erase(from);
 }
 
-void Board::undoMovePieceMini(string from, string to, Piece& capturedPiece){
-    // Undo the move by restoring the piece that was moved
-    piecesPositions[from] = piecesPositions[to];  // Move the piece back to the original position
-    piecesPositions[from].setCasePiece(from); // Update the case (position) of the moved piece
-    piecesPositions[from].setCaseCoordinate(generateCaseCoordinates(from));
-    piecesPositions.erase(to);  // Remove the piece from the destination position
 
-    // If a piece was captured, restore it back to the destination position
+void Board::undoMovePieceMini(string from, string to, Piece& capturedPiece) {
+    cout << "[DEBUG] undoMovePieceMini: undoing move from " << from << " to " << to << endl;
+
+    // Restore the moved piece back to its original position
+    if (!piecesPositions.count(to)) {
+        cout << "[ERROR] Cannot undo: no piece at destination " << to << endl;
+        return;
+    }
+
+    piecesPositions[from] = piecesPositions[to];
+    piecesPositions[from].setCasePiece(from);
+    piecesPositions[from].setCaseCoordinate(generateCaseCoordinates(from));
+    piecesPositions[from].setLastMove(to);
+
+    // Restore captured piece if there was one
     if (capturedPiece.getNamePiece() != "") {
-        piecesPositions[to] = capturedPiece; // Put back the captured piece at the destination
+        capturedPiece.setLastMove(to);
+        capturedPiece.setIsCaptured(false);
+        piecesPositions[to] = capturedPiece;
+    } else {
+        piecesPositions.erase(to);
     }
 }
 
+
 //int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizingPlayer, int alpha, int beta)
 int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizingPlayer) {
+    cout<<"DEPTH : "<<depth<<endl;
     cout<<"debut"<<endl;
     string colorAIPlayer = aiPlayer.getColorPlayer();
     string colorHumanPlayer = opponent.getColorPlayer();
@@ -1543,7 +1602,7 @@ int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizin
 
     //cout << "Depth: " << depth << ", Game over: " << isGameOver(aiPlayer, opponent) << endl;
 
-    if (depth == 0) {
+    if (depth == 0||isGameOver(aiPlayer)) {
         int eval= evaluate(aiPlayer, opponent);
         cout << "Base case reached with evaluation: " << eval << endl;
         return eval;
@@ -1559,22 +1618,43 @@ int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizin
         int maxEval = INT_MIN;
         vector<vector<string>> moves = getAllLegalMoves(aiPlayer, opponent);
         cout<<"marchons"<<endl;
+        
+        if (moves.empty()) {
+            return evaluate(aiPlayer, opponent);  // No moves => evaluate the current state
+        }
+     
+        for (auto m : moves){
+            cout<<"{ "<<m[0]<<", "<<m[1]<<" }\n";
+        }
+
+        cout<<"num of moves (max) :"<<moves.size()<<endl;
+
 
         for (auto move : moves) {
             Board temp = *this;
             Piece capturedPiece;
+            Piece capturedPiece1;
+           
 
             if (move.size() == 4) {
-                temp.movePiece(move[0], move[1]);
-                temp.movePiece(move[2], move[3]);
+                //temp.movePiece(move[0], move[1]);
+                //temp.movePiece(move[2], move[3]);
+                temp.movePieceMini(move[0], move[1], &capturedPiece);
+                temp.movePieceMini(move[2], move[3], &capturedPiece1);
                 cout<<"1"<<endl;
+               
+
 
                 int eval = temp.minimax(aiPlayer, opponent, depth - 1, false);
                 //int eval = temp.minimax(aiPlayer, opponent, depth - 1, false, alpha, beta);
                 cout<<"2"<<endl;
 
-                temp.movePiece(move[1], move[0]);
-                temp.movePiece(move[3], move[2]);
+                //temp.movePiece(move[1], move[0]);
+                //temp.movePiece(move[3], move[2]);
+
+                temp.undoMovePieceMini(move[0],move[1], capturedPiece);
+                temp.undoMovePieceMini(move[2],move[3], capturedPiece1);
+
                 cout<<"3"<<endl;
 
                 maxEval = max(maxEval, eval);
@@ -1621,13 +1701,13 @@ int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizin
                     temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
                     temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
                     cout<<"7"<<endl;
-                    temp.undoMovePieceMini(move[1], move[0], capturedPiece);
+                    temp.undoMovePieceMini(move[0],move[1],capturedPiece);
                     cout<<"8"<<endl;
                 } else {
                     int eval = temp.minimax(aiPlayer, opponent, depth - 1, false);
                     //int eval = temp.minimax(aiPlayer, opponent, depth - 1, false, alpha, beta);
                     cout<<"9"<<endl;
-                    temp.undoMovePieceMini(move[1], move[0], capturedPiece);
+                    temp.undoMovePieceMini(move[0],move[1], capturedPiece);
                     cout<<"10"<<endl;
                     maxEval = max(maxEval, eval);
                     /*alpha = max(alpha, eval);
@@ -1643,21 +1723,37 @@ int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizin
         vector<vector<string>> moves = getAllLegalMoves(opponent, aiPlayer);
         cout<<"enfants"<<endl;
 
+        if (moves.empty()) {
+            return evaluate(aiPlayer, opponent);  // No moves => evaluate the current state
+        }
+        cout<<"num of moves (min) :"<<moves.size()<<endl;
+        for (auto m : moves){
+            cout<<"{ "<<m[0]<<", "<<m[1]<<" }\n";
+        }
+
+       
+
         for (auto move : moves) {
             Board temp = *this;
             Piece capturedPiece;
+            Piece capturedPiece1;
 
             if (move.size() == 4) {
-                temp.movePiece(move[0], move[1]);
-                temp.movePiece(move[2], move[3]);
+                //temp.movePiece(move[0], move[1]);
+                //temp.movePiece(move[2], move[3]);
+                temp.movePieceMini(move[0], move[1], &capturedPiece);
+                temp.movePieceMini(move[2], move[3], &capturedPiece1);
                 cout<<"11"<<endl;
 
                 int eval = temp.minimax(aiPlayer, opponent, depth - 1, true);
                 //int eval = temp.minimax(aiPlayer, opponent, depth - 1, true, alpha, beta);
                 cout<<"12"<<endl;
 
-                temp.movePiece(move[1], move[0]);
-                temp.movePiece(move[3], move[2]);
+                //temp.movePiece(move[1], move[0]);
+                //temp.movePiece(move[3], move[2]);
+
+                temp.undoMovePieceMini(move[0],move[1], capturedPiece);
+                temp.undoMovePieceMini(move[2], move[3], capturedPiece1);
 
                 minEval = min(minEval, eval);
                 /*beta = min(beta, eval);
@@ -1698,14 +1794,14 @@ int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizin
                     temp.getPiecesPositions().at(move[1]).setNamePiece("pawn");
                     temp.getPiecesPositions().at(move[1]).setIsPromoted(false);
                     cout<<"18"<<endl;
-                    temp.undoMovePieceMini(move[1], move[0], capturedPiece);
+                    temp.undoMovePieceMini(move[0], move[1], capturedPiece);
                     cout<<"19"<<endl;
                 } else {
                     cout<<"20"<<endl;
                     int eval = temp.minimax(aiPlayer, opponent, depth - 1, true);
                     //int eval = temp.minimax(aiPlayer, opponent, depth - 1, true, alpha, beta);
                     cout<<"21"<<endl;
-                    temp.undoMovePieceMini(move[1], move[0], capturedPiece);
+                    temp.undoMovePieceMini(move[0],move[1], capturedPiece);
                     cout<<"22"<<endl;
                     minEval = min(minEval, eval);
                     /*beta = min(beta, eval);
@@ -1725,18 +1821,29 @@ vector<string> Board::findBestMove(Player aiPlayer, Player opponent, int depth) 
     vector<string> bestMove;
     cout<<"here"<<endl;
     vector<vector<string>> moves = getAllLegalMoves(aiPlayer, opponent);
+    for (auto m : moves){
+        cout<<"{ "<<m[0]<<", "<<m[1]<<" }\n";
+    }
     cout<<"1"<<endl;
     string colorAIPlayer = aiPlayer.getColorPlayer();
 
     for (auto move : moves) {
+        if (move.size() >= 2 && move[0] == move[1]) continue; // Ignore invalid move
         Board temp = *this;
+        
 
         // Handle castling (4-part move)
         if (move.size() == 4) {
-            temp.movePiece(move[0], move[1]);
-            temp.movePiece(move[2], move[3]);
+            Piece capturedPiece1;
+            Piece capturedPiece2;
+            //temp.movePiece(move[0], move[1]);
+            //temp.movePiece(move[2], move[3]);
+            temp.movePieceMini(move[0],move[1],&capturedPiece1);
+            temp.movePieceMini(move[0],move[1],&capturedPiece2); 
         } else {
-            temp.movePiece(move[0], move[1]);
+            Piece capturedPiece;
+            //temp.movePiece(move[0], move[1]);
+            temp.movePieceMini(move[0],move[1],&capturedPiece);
 
             // Check if promotion is possible
             auto& piece = temp.getPiecesPositions().at(move[1]);
@@ -1776,7 +1883,7 @@ vector<string> Board::findBestMove(Player aiPlayer, Player opponent, int depth) 
         }
 
         // Regular move evaluation
-        cout<<"one"<<endl;
+        cout<<"onestone"<<endl;
         int score = temp.minimax(aiPlayer, opponent, depth - 1, false);
         //int score = temp.minimax(aiPlayer, opponent, depth - 1, false, alpha, beta);
         cout<<"more"<<endl;
@@ -1814,6 +1921,9 @@ vector<vector<string>> Board::getAllLegalMoves(Player currentPlayer, Player adve
 
                 // Make sure we don't generate moves to the same square
                 if (start == end) continue;
+
+                // Make sure we don't generate moves to a square belonging to us
+                if (piecesPositions.count(end) && piecesPositions.at(end).getColorPiece() == color) continue;
 
                 // Check move legality and path clearance (except for knight)
                 if (piece.isMoveLegal(coord) &&
@@ -1935,7 +2045,7 @@ int Board::gameLogicAI(Player humanPlayer,Player aiPlayer){
 
 int Board::makeAMoveAI(Player aiPlayer,Player adverser){
     cout<<"cou"<<endl;
-    vector<string> move = findBestMove(aiPlayer,adverser,2);
+    vector<string> move = findBestMove(aiPlayer,adverser,3);
     //vector<string> move = findBestMove(aiPlayer,adverser,2,INT_MIN, INT_MAX);//pb here
     cout<<"coucou"<<endl;
     string playerColor=aiPlayer.getColorPlayer();   
@@ -2064,21 +2174,77 @@ int Board::makeAMoveAI(Player aiPlayer,Player adverser){
     return 1;
 }
 
+void Board::displayPiecesMap() const {
+    for (auto entry : piecesPositions) {
+        cout << entry.first << ": " << entry.second.getNamePiece() << endl;
+    }
+}
+
+
 /*int main(){
 
     Board b;
     b.initiateBoard();
     cout<<"row :"<<b.getBoard().size()<<endl;
     cout<<"column : "<<b.getBoard()[0].size()<<endl;
-    b.printBoard();
-
+    
     Player p1("white");
     Player p2("black");
-
-    int t=b.playerTurnAI(p2,p1);
+    int t=0;
     b.printBoard();
     
+    for(int i=0; i<5; i++){
+        t=b.playerTurn(p1,p2);
+        t=b.playerTurnAI(p2,p1);
+    }
+    
 }*/
+/*int main() {
+    Board b;
+    b.initiateBoard();
+
+    cout << "Initial Board:" << endl;
+    b.printBoard();
+
+    Piece captured;
+
+    // Perform a move
+    b.movePieceMini("b2", "b4", &captured);
+
+    cout << "\nAfter b2 to b4:" << endl;
+    b.printBoard();
+
+    cout << "\nAfter doing b2 to b4:" << endl;
+    b.printBoard();
+
+    // Try another move
+    b.movePieceMini("a7", "a5", &captured);
+
+    cout << "\nAfter a7 to a5:" << endl;
+    b.printBoard();
+    cout<<b.getPiecesPositions().at("a5").getNamePiece()<<endl;
+
+    b.movePieceMini("b4", "a5", &captured);
+    cout<<captured.getNamePiece()<<endl;
+
+    cout << "\nAfter b4 to a5:" << endl;
+    b.printBoard();
+
+    // Undo the move
+    b.undoMovePieceMini("b4", "a5", captured);
+    cout << "\nAfter a5 to b4:" << endl;
+    cout<<captured.getNamePiece()<<endl;
+    cout<<b.getPiecesPositions().at("a5").getNamePiece()<<endl;
+    b.printBoard();
+
+    return 0;
+}*/
+
+
+ /*vector<vector<string>> allMoves=b.getAllLegalMoves(p1,p2);
+    for (auto m : allMoves){
+        cout<<"{ "<<m[0]<<", "<<m[1]<<" }\n";
+    }*/
     
   /*Piece kw;
     Piece rw1;

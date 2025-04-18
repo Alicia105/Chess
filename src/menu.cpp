@@ -86,7 +86,7 @@ int main(){
 
         while(t==5){
             t=b.gameLogicAI(p1,p2);
-            if(b.isGameOver(p1,p2)){
+            if(b.isGameOver(p2)){
                 b.printScore();
             }
         }

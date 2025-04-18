@@ -340,27 +340,23 @@ bool Piece::pawnCapture(vector<int> coordinates){
 //good
 bool Piece::rookMove(vector<int> coordinates){
 
-    for(int x=0;x<=7;x++){
-        //coordinates in C++: coordinates[0]=row,coordinates[1]=column;
-        
-        //vertical move
-        if(coordinatesOnBoard[0]+x<=7 || coordinatesOnBoard[0]-x>=0){
-            if(coordinates[0]==coordinatesOnBoard[0]-x || coordinates[0]==coordinatesOnBoard[0]+x){
-                 return true;
-            }
-        }
-        
-        //horizontal move
-        if(coordinatesOnBoard[1]+x<=7 || coordinatesOnBoard[1]-x>=0){
-            if(coordinates[1]==coordinatesOnBoard[1]-x || coordinates[1]==coordinatesOnBoard[1]+x){
-                    return true;
-            }
-        }
-    }
+    if(coordinates[0]<0 && coordinates[0]>=8) return false;
+    if(coordinates[1]<0 && coordinates[1]>=8) return false;
     
+    //coordinates in C++: coordinates[0]=row,coordinates[1]=column;
+    // Vertical move: same column, different row
+    if (coordinates[1] == coordinatesOnBoard[1] && coordinates[0] != coordinatesOnBoard[0]) {
+        return true;
+    }
+    // Horizontal move: same row, different column
+    if (coordinates[0] == coordinatesOnBoard[0] && coordinates[1] != coordinatesOnBoard[1]) {
+        return true;
+    }
+            
     return false;      
     
 }
+
 
 //good
 bool Piece::knightMove(vector<int> coordinates){

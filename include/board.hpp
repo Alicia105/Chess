@@ -69,7 +69,7 @@ class Board{
     std::string processMoveInput(std::string moveInput);//good
 
     //for ai
-    bool isGameOver(Player aiPlayer, Player opponent);
+    bool isGameOver(Player aiPlayer);
     int evaluate(Player& aiPlayer, Player& humanPlayer);
     void movePieceMini(std::string from, std::string to,Piece* capturedPiece = nullptr);
     void undoMovePieceMini(std::string from, std::string to,Piece& capturedPiece);
@@ -81,6 +81,7 @@ class Board{
     int playerTurnAI(Player humanPlayer,Player aiPlayer);
     int gameLogicAI(Player humanPlayer,Player aiPlayer);
     int makeAMoveAI(Player aiPlayer,Player adverser);
+    void displayPiecesMap() const;
     
 };
 
