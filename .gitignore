@@ -11,3 +11,4 @@ src/o.cpp
 src/r.cpp
 n.cpp
 app.py
+src/CMakeLists.txt

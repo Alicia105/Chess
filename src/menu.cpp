@@ -1,5 +1,6 @@
 #include <iostream>
 #include "../include/board.hpp"
+#include "../include/chessGUI.hpp"
 #include "../include/menu.hpp"
 
 using namespace std;
@@ -52,6 +53,12 @@ int main(){
 
     p1.initiatePlayer(b.getPiecesPositions());
     p2.initiatePlayer(b.getPiecesPositions());
+
+    int a=displayChessBoard(b,p1,p2);
+
+    if(a==1){
+        
+    }
 
     //start game
     printWelcome();

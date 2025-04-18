@@ -2190,6 +2190,11 @@ void Board::displayPiecesMap() const {
     }
 }
 
+//for GUI
+void Board::movePieceGUI(string selectedSquare, string moveTo){
+
+}
+
 
 /*int main(){
 

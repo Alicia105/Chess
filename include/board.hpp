@@ -82,6 +82,10 @@ class Board{
     int gameLogicAI(Player humanPlayer,Player aiPlayer);
     int makeAMoveAI(Player aiPlayer,Player adverser);
     void displayPiecesMap() const;
+
+    //for GUI
+    void movePieceGUI(std::string selectedSquare, std::string moveTo);
+    
     
 };
 
