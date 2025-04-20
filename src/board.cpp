@@ -1887,9 +1887,11 @@ vector<string> Board::findBestMove(Player aiPlayer, Player opponent, int depth,i
     return bestMove;
 }
 
+
 vector<vector<string>> Board::getAllLegalMoves(Player& currentPlayer, Player& adverser) {
     string colorPlayer = currentPlayer.getColorPlayer();
     vector<vector<string>> allMoves;
+    string kingPositionOpponent=getKingPosition(adverser);
 
     for (auto p : piecesPositions) {
         Piece& piece = p.second;
@@ -1909,6 +1911,8 @@ vector<vector<string>> Board::getAllLegalMoves(Player& currentPlayer, Player& ad
 
                 // Make sure we don't generate moves to a square belonging to us
                 if (piecesPositions.count(end) && piecesPositions.at(end).getColorPiece() == color) continue;
+
+                if(end==kingPositionOpponent) continue;
 
                 if (name == "pawn") {
                     if (!piecesPositions.count(end)) {
