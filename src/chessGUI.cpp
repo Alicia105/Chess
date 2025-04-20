@@ -9,6 +9,13 @@ const int TILE_SIZE = 100;
 const int BOARD_SIZE = 8;
 const int WINDOW_SIZE = TILE_SIZE * BOARD_SIZE;
 
+const int LABEL_MARGIN = 40;
+
+const int TITLE_HEIGHT = 60;
+const int WINDOW_WIDTH = TILE_SIZE * BOARD_SIZE + 2 * LABEL_MARGIN;
+const int WINDOW_HEIGHT = TILE_SIZE * BOARD_SIZE + TITLE_HEIGHT + LABEL_MARGIN;
+
+
 using namespace std;
 
 sf::Vector2f getTilePosition(int row, int col) {
@@ -38,9 +45,9 @@ map<string, string> stateBoard(Board b){
 }
 
 int displayChessBoard(Board b, Player p1, Player p2){
-    const int WINDOW_HEIGHT = TILE_SIZE * BOARD_SIZE + 100; // extra room
-    sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE, WINDOW_HEIGHT), "Chess GUI with SFML");
-    //sf::RenderWindow window(sf::VideoMode({WINDOW_SIZE, WINDOW_SIZE}), "Chess GUI with SFML");
+    //const int WINDOW_HEIGHT = TILE_SIZE * BOARD_SIZE + 100; // extra room
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Chess GUI with SFML");
+
     window.setFramerateLimit(60);
 
     sf::Color lightSquare(240, 217, 181);
@@ -48,9 +55,7 @@ int displayChessBoard(Board b, Player p1, Player p2){
 
     map<string, sf::Texture> pieceTextures;
     map<string, sf::Sprite> pieceSprites;
-    // Sprite storage with unique_ptr
-    //map<string, unique_ptr<sf::Sprite>> pieceSprites;
-
+    
     string pieces[] = {
         "wp", "wr", "wn", "wb", "wq", "wk",
         "bp", "br", "bn", "bb", "bq", "bk"
@@ -58,20 +63,26 @@ int displayChessBoard(Board b, Player p1, Player p2){
 
     for (const auto& name : pieces) {
         sf::Texture texture;
-        sf::Sprite sprite;
+        sf::Sprite sprite;        
         
         if (!texture.loadFromFile("../resources/images/chessIcons/" + name + ".png")) {
             cerr << "Failed to load " << name << ".png" << endl;
             continue;
         }
         pieceTextures[name] = texture;
-        //sf::Sprite sprite(texture);
-        //pieceSprites[name]=sprite;
-        pieceSprites[name].setTexture(pieceTextures[name]);
 
-        // Create sprite and store in map
-        //auto sprite = make_unique<sf::Sprite>(pieceTextures[name]);
-        //pieceSprites[name] = std::move(sprite);
+        // Center origin
+        sprite.setTexture(pieceTextures[name]);
+        sf::FloatRect bounds = sprite.getLocalBounds();
+        sprite.setOrigin(bounds.width / 2.f, bounds.height / 2.f);
+    
+        // Scale to TILE_SIZE (e.g., 70% of tile)
+        float scaleX = (TILE_SIZE * 0.7f) / bounds.width;
+        float scaleY = (TILE_SIZE * 0.7f) / bounds.height;
+        sprite.setScale(scaleX, scaleY);
+    
+        pieceSprites[name]=sprite;
+
     }
 
     // Initial positions
@@ -150,63 +161,55 @@ int displayChessBoard(Board b, Player p1, Player p2){
         // Offset board down to leave room for title
         int boardOffsetY = 50;  // Space for title
 
+        // Background frame
+        sf::RectangleShape boardFrame(sf::Vector2f(BOARD_SIZE * TILE_SIZE + 2, BOARD_SIZE * TILE_SIZE + 2));
+        boardFrame.setPosition(LABEL_MARGIN - 1, TITLE_HEIGHT);
+        boardFrame.setFillColor(sf::Color(50, 50, 50));  // Border dark gray
+        boardFrame.setOutlineColor(sf::Color::White);
+        boardFrame.setOutlineThickness(2);
+        window.draw(boardFrame);
+
         // Draw board with labels
         for (int row = 0; row < BOARD_SIZE; ++row) {
             for (int col = 0; col < BOARD_SIZE; ++col) {
                 sf::RectangleShape tile(sf::Vector2f(TILE_SIZE, TILE_SIZE));
-                tile.setPosition(col * TILE_SIZE, boardOffsetY + row * TILE_SIZE);
+                tile.setPosition(LABEL_MARGIN + col * TILE_SIZE, TITLE_HEIGHT + row * TILE_SIZE);
                 tile.setFillColor((row + col) % 2 == 0 ? lightSquare : darkSquare);
                 window.draw(tile);
             }
         }
-
-        // Draw board
-        /*for (int row = 0; row < BOARD_SIZE; ++row) {
-            for (int col = 0; col < BOARD_SIZE; ++col) {
-                sf::RectangleShape tile(sf::Vector2f(TILE_SIZE, TILE_SIZE));
-                tile.setPosition(getTilePosition(row, col));
-                tile.setFillColor((row + col) % 2 == 0 ? lightSquare : darkSquare);
-                window.draw(tile);
-            }
-        }*/
-
+        
         // Draw labels
         for (int i = 0; i < BOARD_SIZE; ++i) {
-            // Column labels (a–h)
+            // Column label (a–h) below
             sf::Text colLabel;
             colLabel.setFont(font);
-            colLabel.setCharacterSize(18);
-            colLabel.setFillColor(sf::Color::Black);
+            colLabel.setCharacterSize(24);
+            colLabel.setFillColor(sf::Color::White);
+            colLabel.setStyle(sf::Text::Bold);
             colLabel.setString(static_cast<char>('a' + i));
-            colLabel.setPosition(i * TILE_SIZE + TILE_SIZE / 2 - 5, boardOffsetY + BOARD_SIZE * TILE_SIZE + 5);
+            colLabel.setPosition(LABEL_MARGIN + i * TILE_SIZE + TILE_SIZE / 2 - 8, TITLE_HEIGHT + TILE_SIZE * BOARD_SIZE + 5);
             window.draw(colLabel);
-
-            // Row labels (8–1)
+        
+            // Row label (8–1) on left
             sf::Text rowLabel;
             rowLabel.setFont(font);
-            rowLabel.setCharacterSize(18);
-            rowLabel.setFillColor(sf::Color::Black);
+            rowLabel.setCharacterSize(24);
+            rowLabel.setFillColor(sf::Color::White);
+            rowLabel.setStyle(sf::Text::Bold);
             rowLabel.setString(std::to_string(8 - i));
-            rowLabel.setPosition(5, boardOffsetY + i * TILE_SIZE + TILE_SIZE / 2 - 10);
+            rowLabel.setPosition(10, TITLE_HEIGHT + i * TILE_SIZE + TILE_SIZE / 2 - 15);
             window.draw(rowLabel);
         }
-
-        // Draw pieces
-        /*for (const auto& entry : board ) {
-            auto [row, col] = getBoardCoords(entry.first);
-            string pieceName = entry.second;
-            sf::Sprite& sprite = pieceSprites[pieceName];
-            sprite.setPosition(getTilePosition(row, col));
-            window.draw(sprite);
-        }*/
-
+        
         // Draw pieces
         for (const auto& entry : board ) {
             auto [row, col] = getBoardCoords(entry.first);
             std::string pieceName = entry.second;
             sf::Sprite& sprite = pieceSprites[pieceName];
-            //sprite.setPosition(getTilePosition(row, col));
-            sprite.setPosition(col * TILE_SIZE, boardOffsetY + row * TILE_SIZE);
+            //sprite.setPosition(LABEL_MARGIN + col * TILE_SIZE, TITLE_HEIGHT + row * TILE_SIZE);
+            sprite.setPosition(LABEL_MARGIN + col * TILE_SIZE + TILE_SIZE / 2.f,TITLE_HEIGHT + row * TILE_SIZE + TILE_SIZE / 2.f);
+
             window.draw(sprite);
         }
         
