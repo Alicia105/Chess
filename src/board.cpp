@@ -1519,19 +1519,6 @@ int Board::evaluate(Player& aiPlayer, Player& opponent){
     return score;
 }
 
-/*void Board::movePieceMini(string from, string to, Piece* capturedPiece) {
-    // Check if there's a piece to capture
-    if (piecesPositions.count(to) && capturedPiece != nullptr) {
-        *capturedPiece = piecesPositions.at(to); // Store the captured piece in the pointer
-    }
-
-    // Move the piece
-    piecesPositions[to] = piecesPositions[from];
-    piecesPositions[to].setCasePiece(to);
-    piecesPositions[to].setCaseCoordinate(generateCaseCoordinates(to));
-    piecesPositions.erase(from);
-}*/
-
 void Board::movePieceMini(string from, string to, Piece* capturedPiece) {
     cout << "[DEBUG] movePieceMini: trying to move from " << from << " to " << to << endl;
 
@@ -1566,7 +1553,6 @@ void Board::movePieceMini(string from, string to, Piece* capturedPiece) {
     piecesPositions.erase(from);
 }
 
-
 void Board::undoMovePieceMini(string from, string to, Piece& capturedPiece) {
     cout << "[DEBUG] undoMovePieceMini: undoing move from " << from << " to " << to << endl;
 
@@ -1590,7 +1576,6 @@ void Board::undoMovePieceMini(string from, string to, Piece& capturedPiece) {
         piecesPositions.erase(to);
     }
 }
-
 
 int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizingPlayer, int alpha, int beta){
 //int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizingPlayer) {
@@ -2191,7 +2176,84 @@ void Board::displayPiecesMap() const {
 }
 
 //for GUI
-void Board::movePieceGUI(string selectedSquare, string moveTo){
+int Board::movePieceGUI(Player& currentPlayer, Player& adverser,string selectedSquare, string moveTo){
+    cout<<"1"<<endl;
+
+    string colorPlayer=currentPlayer.getColorPlayer();
+    cout<<"2"<<endl;
+    vector<vector<string>> moves =getAllLegalMoves(currentPlayer, adverser);
+    cout<<"3"<<endl;
+
+
+    // Prevent moving to the same square
+    if (selectedSquare == moveTo){
+        cout<<"4"<<endl;
+        cout << "[ERROR] Invalid move: source and destination are the same (" << selectedSquare << ")" << endl;
+        return 1;
+    }
+
+    // Check if there's a piece at the source
+    if (!piecesPositions.count(selectedSquare)) {
+        cout<<"5"<<endl;
+        cout << "[ERROR] No piece at source square " << selectedSquare << endl;
+        return 2;
+    }
+
+    // Move opponent's piece 
+    if (piecesPositions.count(selectedSquare) && piecesPositions.at(selectedSquare).getColorPiece()!=colorPlayer){
+        cout<<"6"<<endl;
+        cout << "[ERROR] Opponent's piece : you can't move it"<< endl;
+        return 3;              
+    }
+
+    // Move to a piece occupied by player's piece 
+    if (piecesPositions.count(moveTo) && piecesPositions.at(moveTo).getColorPiece()==colorPlayer){
+        cout<<"7"<<endl;
+        cout << "[ERROR] Square occupied by your piece : you can't move your square to your piece"<< endl;
+        return 4;              
+    }
+
+    cout<<"8"<<endl;
+    for(auto m: moves){
+        cout<<"9"<<endl;
+        if(m.size()==2){
+            cout<<"10"<<endl;
+            if(m[0]==selectedSquare && m[1]==moveTo){
+                cout<<"11"<<endl;
+                if (piecesPositions.count(moveTo) && piecesPositions.at(moveTo).getColorPiece() == adverser.getColorPlayer()) {
+                    cout<<"12"<<endl;
+                    // Capture the piece
+                    Piece& adverserPiece = piecesPositions.at(moveTo);
+                    adverserPiece.setIsCaptured(true);
+                    adverserPiece.setLastMove(moveTo);
+                    currentPlayer.getCapturedPieces().push_back(adverserPiece);
+                    adverser.getPlayerPiecesPositions().erase(moveTo);
+            
+                }
+                cout<<"13"<<endl;            
+                Piece& p=piecesPositions.at(selectedSquare);
+                vector<int> endCoord=generateCaseCoordinates(selectedSquare);
+            
+                p.setCaseCoordinate(endCoord);
+                p.setCasePiece(moveTo);
+                p.setLastMove(selectedSquare);
+                p.wasMoved();
+            
+                piecesPositions[moveTo] = p;
+                piecesPositions.erase(selectedSquare);
+            
+                currentPlayer.getPlayerPiecesPositions()[moveTo] = p;
+                currentPlayer.getPlayerPiecesPositions().erase(selectedSquare);
+            
+                
+                currentPlayer.playedAMove();
+                return 0;
+            }
+
+        }
+    }
+
+    return 5;
 
 }
 
@@ -2205,15 +2267,24 @@ void Board::movePieceGUI(string selectedSquare, string moveTo){
     
     Player p1("white");
     Player p2("black");
+
+    p1.initiatePlayer(b.getPiecesPositions());
+    p2.initiatePlayer(b.getPiecesPositions());
+    
     int t=0;
     b.printBoard();
     
-    for(int i=0; i<5; i++){
+    /*for(int i=0; i<5; i++){
         t=b.playerTurn(p1,p2);
         t=b.playerTurnAI(p2,p1);
     }
-    
+
+    //t=b.movePieceGUI(p1,p2,"a2","a4");
+
+    b.printBoard();
+    return t;    
 }*/
+
 /*int main() {
     Board b;
     b.initiateBoard();
@@ -2254,90 +2325,6 @@ void Board::movePieceGUI(string selectedSquare, string moveTo){
 
     return 0;
 }*/
-
-
- /*vector<vector<string>> allMoves=b.getAllLegalMoves(p1,p2);
-    for (auto m : allMoves){
-        cout<<"{ "<<m[0]<<", "<<m[1]<<" }\n";
-    }*/
-    
-  /*Piece kw;
-    Piece rw1;
-    Piece rw2;
-
-    kw.setColorPiece("white");
-    kw.setCaseCoordinate(b.generateCaseCoordinates("e1"));
-    kw.setCasePiece("e1");
-    kw.setNamePiece("king");
-
-    rw1.setColorPiece("white");
-    rw1.setCaseCoordinate(b.generateCaseCoordinates("a1"));
-    rw1.setCasePiece("a1");
-    rw1.setNamePiece("rook");
-
-    rw2.setColorPiece("white");
-    rw2.setCaseCoordinate(b.generateCaseCoordinates("h1"));
-    rw2.setCasePiece("h1");
-    rw2.setNamePiece("rook");
-
-    
-
-    b.getPiecesPositions()["e1"]=kw;
-    //b.getPiecesPositions()["a1"]=rw1;
-    b.getPiecesPositions()["h1"]=rw2;
-
-    b.printBoard();
-    cout<<"\n\n"<<endl;
-
-    cout<<b.getPiecesPositions().size()<<endl;
-    cout<<b.isCastlingPossible(p1)<<endl;
-    cout<<b.isKingsideCastlingPossible(p1)<<endl;
-    cout<<b.isQueensideCastlingPossible(p1)<<endl;
-    cout<<"\n\n"<<endl;
-    b.chooseCastling(p1);
-
-    //b.doQueensideCastling(p1);
-    //b.doKingsideCastling(p1);
-    b.printBoard();
-
-    //cout<<b.isStaleMate(p2)<<endl;*/
-
-    /*b.clearBoard();
-    //b.printBoard();
-
-  
-    //Stalemate
-
-    Piece bk,bq, wk;
-
-    bk.setColorPiece("black");
-    bk.setNamePiece("king");
-    bk.setCasePiece("f2");
-    bk.setCaseCoordinate(b.generateCaseCoordinates("f2"));
-
-    bq.setColorPiece("black");
-    bq.setNamePiece("queen");
-    bq.setCasePiece("g3");
-    bq.setCaseCoordinate(b.generateCaseCoordinates("g3"));
-
-    wk.setColorPiece("white");
-    wk.setNamePiece("king");
-    wk.setCasePiece("h1");
-    wk.setCaseCoordinate(b.generateCaseCoordinates("h1"));
-
-    b.getPiecesPositions()["f2"] = bk;
-    b.getPiecesPositions()["g3"] =bq;
-    b.getPiecesPositions()["h1"] = wk;
-
-    b.printBoard();
-
-    Player black("black");
-    cout << "isCheckMate: " << b.isCheckMate(p1) << endl;
-    cout << "isKingUnderAttack: " << b.isKingUnderAttack(p1, "h1") << endl;
-    cout<< "isStalemate : "<< b.isStaleMate(p1);*/
-   
-    
-
 
   
 

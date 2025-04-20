@@ -8,6 +8,6 @@
 #include "board.hpp" 
 
 sf::Vector2f getTilePosition(int row, int col);
-int displayChessBoard(Board b, Player p1, Player p2);
+int displayChessBoard(Board b, Player p1, Player p2, bool playAI);
 
 #ifndef

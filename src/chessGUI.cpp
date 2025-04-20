@@ -44,7 +44,70 @@ map<string, string> stateBoard(Board b){
     return board;
 }
 
-int displayChessBoard(Board b, Player p1, Player p2){
+bool askOpponentType() {
+    const int WIDTH = 600, HEIGHT = 400;
+    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Choose Opponent");
+
+    sf::Font font;
+    if (!font.loadFromFile("../resources/Font/Raleway-Light.ttf")) {
+        cerr << "Failed to load font!" << endl;
+        return false;
+    }
+
+    sf::Text title("Choose Your Opponent", font, 36);
+    title.setPosition(100, 40);
+    title.setFillColor(sf::Color::White);
+
+    sf::RectangleShape humanBtn(sf::Vector2f(200, 60));
+    humanBtn.setPosition(100, 150);
+    humanBtn.setFillColor(sf::Color(100, 200, 100));
+
+    sf::Text humanText("Play vs Human", font, 24);
+    humanText.setPosition(120, 165);
+    humanText.setFillColor(sf::Color::Black);
+
+    sf::RectangleShape aiBtn(sf::Vector2f(200, 60));
+    aiBtn.setPosition(100, 250);
+    aiBtn.setFillColor(sf::Color(200, 100, 100));
+
+    sf::Text aiText("Play vs AI", font, 24);
+    aiText.setPosition(140, 265);
+    aiText.setFillColor(sf::Color::Black);
+
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed)
+                window.close();
+
+            if (event.type == sf::Event::MouseButtonPressed) {
+                auto mouseX = event.mouseButton.x;
+                auto mouseY = event.mouseButton.y;
+
+                if (humanBtn.getGlobalBounds().contains(mouseX, mouseY)) {
+                    window.close();
+                    return false; // play vs human
+                }
+                if (aiBtn.getGlobalBounds().contains(mouseX, mouseY)) {
+                    window.close();
+                    return true; // play vs AI
+                }
+            }
+        }
+
+        window.clear(sf::Color(30, 30, 30));
+        window.draw(title);
+        window.draw(humanBtn);
+        window.draw(humanText);
+        window.draw(aiBtn);
+        window.draw(aiText);
+        window.display();
+    }
+
+    return false; // default
+}
+
+int displayChessBoard(Board b, Player p1, Player p2, bool playAI){
     //const int WINDOW_HEIGHT = TILE_SIZE * BOARD_SIZE + 100; // extra room
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Chess GUI with SFML");
 
@@ -94,16 +157,16 @@ int displayChessBoard(Board b, Player p1, Player p2){
         return -1;
     }
         
-    auto getBoardCoords = [](const string& pos) {
-        int col = pos[0] - 'a';
-        int row = 8 - (pos[1] - '0');
-        //vector<int> coords = b.generateCaseCoordinates(pos);
-        return make_pair(row, col);
+    auto getBoardCoords = [](Board b,string pos) {
+        vector<int> coords = b.generateCaseCoordinates(pos);
+        return make_pair(coords[0],coords[1]);
     };
 
     
     string selectedSquare = "";
     bool isSelecting = false;
+    string currentTurn = "white";  // white starts
+    bool justPlayed=false;
 
     sf::Text title("Chess AI", font, 32);
     title.setFillColor(sf::Color::White);
@@ -111,6 +174,7 @@ int displayChessBoard(Board b, Player p1, Player p2){
         
 
     while (window.isOpen()) {
+        board=stateBoard(b);
 
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -119,40 +183,60 @@ int displayChessBoard(Board b, Player p1, Player p2){
                 return 1; 
             } 
 
-            /*if (event.type == sf::Event::MouseButtonPressed) {
-                if (event.mouseButton.button == sf::Mouse::Left) {
-                    int x = event.mouseButton.x;
-                    int y = event.mouseButton.y;
-    
-                    int col = x / squareSize;
-                    int row = y / squareSize;
-    
-                    // Flip Y-axis if needed
-                    string clickedSquare = b.generateNameCase({row, col});
-    
-                    if (!isSelecting) {
-                        selectedSquare = clickedSquare;
-                        isSelecting = true;
-                        cout << "Selected from: " << selectedSquare << endl;
-                    } else {
-                        string moveTo = clickedSquare;
-                        isSelecting = false;
-                        cout << "Trying move: " << selectedSquare << " -> " << moveTo << endl;
-    
-                        // Call your move logic here
-                        if (b.makeMove(selectedSquare, moveTo)) {
-                            cout << "Move made!" << endl;
-                            //update board for drawing
-                            board=stateBoard(b);
-                        } else {
-                            cout << "Illegal move!" << endl;
-                        }
-                    }
-                }
-            }*/
-        }
-        
+            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+                if (event.mouseButton.x >= LABEL_MARGIN && 
+                    event.mouseButton.x < LABEL_MARGIN + TILE_SIZE * BOARD_SIZE &&
+                    event.mouseButton.y >= TITLE_HEIGHT &&
+                    event.mouseButton.y < TITLE_HEIGHT + TILE_SIZE * BOARD_SIZE){
 
+                    int col = (event.mouseButton.x - LABEL_MARGIN) / TILE_SIZE;
+                    int row = (event.mouseButton.y - TITLE_HEIGHT) / TILE_SIZE;
+                
+                    // process clicked square
+                    string clickedSquare = b.generateNameCase({row, col});
+
+                    if (!isSelecting) {
+                        // First click: select
+                        if (b.getPiecesPositions().count(clickedSquare) &&
+                            b.getPiecesPositions().at(clickedSquare).getColorPiece() == currentTurn) {
+                            selectedSquare = clickedSquare;
+                            cout << "Clicked square: " << clickedSquare << " (" << row << "," << col << ")" << endl;
+                            isSelecting = true;
+                        }
+                    } 
+                    else {
+                        // Second click: try move
+                        string moveTo = clickedSquare;
+                        cout << "Clicked square: " << clickedSquare << " (" << row << "," << col << ")" << endl;
+
+                        isSelecting = false;
+                        int r;
+                        if(currentTurn == "white"){
+                            r=b.movePieceGUI(p1,p2,selectedSquare,moveTo);
+                        }
+                        if(currentTurn == "black" && playAI==false){
+                            r=b.movePieceGUI(p2,p1,selectedSquare,moveTo);
+                        }
+                    
+                        if(r!=0){
+                            selectedSquare = "";
+                            continue;
+                        }
+
+                        else{
+                            // Move succeeded
+                            board=stateBoard(b);
+                            currentTurn = (currentTurn == "white") ? "black" : "white";
+                            justPlayed=true;
+                        }
+
+                        selectedSquare = "";
+                    }
+                               
+                }
+            }
+        }
+         
         window.clear();
 
         // Draw title
@@ -202,9 +286,19 @@ int displayChessBoard(Board b, Player p1, Player p2){
             window.draw(rowLabel);
         }
         
+        // Highlight selected tile
+    
+        if (isSelecting && !selectedSquare.empty() && b.getPiecesPositions().count(selectedSquare)) {
+            auto [row, col] = getBoardCoords(b, selectedSquare);
+            sf::RectangleShape highlight(sf::Vector2f(TILE_SIZE, TILE_SIZE));
+            highlight.setPosition(LABEL_MARGIN + col * TILE_SIZE, TITLE_HEIGHT + row * TILE_SIZE);
+            highlight.setFillColor(sf::Color(0, 255, 0, 100));  // semi-transparent green
+            window.draw(highlight);
+        }
+
         // Draw pieces
         for (const auto& entry : board ) {
-            auto [row, col] = getBoardCoords(entry.first);
+            auto [row, col] = getBoardCoords(b,entry.first);
             std::string pieceName = entry.second;
             sf::Sprite& sprite = pieceSprites[pieceName];
             //sprite.setPosition(LABEL_MARGIN + col * TILE_SIZE, TITLE_HEIGHT + row * TILE_SIZE);
@@ -213,7 +307,23 @@ int displayChessBoard(Board b, Player p1, Player p2){
             window.draw(sprite);
         }
         
+        
         window.display();
+
+        // Handle AI move if needed
+        if (playAI && currentTurn == "black" && justPlayed) {
+           
+            //std::this_thread::sleep_for(std::chrono::milliseconds(500)); // delay to simulate thinking
+            int t=b.makeAMoveAI(p2,p1);
+            if(t==1){
+                cout<<"[ERROR]: AI internal error"<<endl;
+                return 1;
+            }
+            board=stateBoard(b);
+            p2.playedAMove();
+            currentTurn = "white";
+            justPlayed=false;
+        }
     }
 
     return 0;
@@ -221,6 +331,9 @@ int displayChessBoard(Board b, Player p1, Player p2){
 }
 
 int main() {
+
+    bool playAI = askOpponentType();  // Player chooses here
+
     Board b;
     b.initiateBoard();
     Player p1("white");
@@ -229,7 +342,7 @@ int main() {
     p1.initiatePlayer(b.getPiecesPositions());
     p2.initiatePlayer(b.getPiecesPositions());
 
-    int a=displayChessBoard(b,p1,p2);
+    int a=displayChessBoard(b,p1,p2,playAI);
 
     cout<<"a :"<<a<<endl;
    

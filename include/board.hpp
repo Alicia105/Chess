@@ -84,7 +84,7 @@ class Board{
     void displayPiecesMap() const;
 
     //for GUI
-    void movePieceGUI(std::string selectedSquare, std::string moveTo);
+    int movePieceGUI(Player& currentPlayer, Player& adverser,std::string selectedSquare, std::string moveTo);
     
     
 };
