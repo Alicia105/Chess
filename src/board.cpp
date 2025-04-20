@@ -2249,6 +2249,27 @@ int Board::movePieceGUI(Player& currentPlayer, Player& adverser,string selectedS
                 currentPlayer.getPlayerPiecesPositions().erase(selectedSquare);
                 
                 currentPlayer.playedAMove();
+
+                if(isEnPassant(currentPlayer,adverser,selectedSquare,moveTo)){
+                    cout<<"14"<<endl;
+                    int dir;
+                    if(colorPlayer=="white"){
+                        dir=1;
+                    }
+                    if(colorPlayer=="black"){
+                        dir=-1;
+                    }
+                    vector<int>pawnCoord={p.getCaseCoordinate()[0]+dir,p.getCaseCoordinate()[1]};
+                    string endPos=generateNameCase(pawnCoord);
+                    // Capture the piece
+                    Piece& adverserPiece = piecesPositions.at(endPos);
+                    adverserPiece.setIsCaptured(true);
+                    adverserPiece.setLastMove(endPos);
+                    currentPlayer.getCapturedPieces().push_back(adverserPiece);
+                    adverser.getPlayerPiecesPositions().erase(endPos);            
+
+                }
+
                 cout<<"promotion ? :"<<currentPlayer.getPlayerPiecesPositions().at(moveTo).canBePromoted()<<endl;
                 cout<<"promotion in board ? :"<<piecesPositions.at(moveTo).canBePromoted()<<endl;
                 if(currentPlayer.getPlayerPiecesPositions().at(moveTo).canBePromoted()){
@@ -2272,13 +2293,16 @@ void Board::promotePawnGUI(Player& p, string position, char type){
         case 'r':
             name="rook";
             break;
-        case 'k':
+        case 'n':
             name="knight";
             break;
         case 'b':
             name="bishop";
             break;
         case 'q':
+            name="queen";
+            break;
+        default :
             name="queen";
             break;
     }

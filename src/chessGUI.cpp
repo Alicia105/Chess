@@ -108,13 +108,13 @@ bool askOpponentType() {
 
 char promptPromotion(sf::RenderWindow& window, const map<string, sf::Sprite>& pieceSprites, const string& color) {
     sf::RectangleShape background(sf::Vector2f(WINDOW_WIDTH, WINDOW_HEIGHT));
-    background.setFillColor(sf::Color(0, 0, 0, 150));  // semi-transparent dark overlay
-
     sf::Font font;
     font.loadFromFile("../resources/Font/Raleway-Light.ttf");
 
     sf::Text message("Choose a piece to promote to:", font, 28);
+    background.setFillColor(sf::Color(245, 222, 179, 255));  // wheat
     message.setFillColor(sf::Color::White);
+   
     message.setPosition(WINDOW_WIDTH / 2 - message.getLocalBounds().width / 2, 100);
 
     // Promotion options
@@ -284,7 +284,7 @@ int displayChessBoard(Board& b, Player& p1, Player& p2, bool playAI){
                             }
                         }
                     
-                        if(r!=0){
+                        if(r==1){
                             selectedSquare = "";
                             continue;
                         }
@@ -399,7 +399,7 @@ int main() {
 
     bool playAI = askOpponentType();  // Player chooses here
 
-    /*Board b;
+    Board b;
     b.initiateBoard();
     Player p1("white");
     Player p2("black");
@@ -407,9 +407,9 @@ int main() {
     p1.initiatePlayer(b.getPiecesPositions());
     p2.initiatePlayer(b.getPiecesPositions());
 
-    int a=displayChessBoard(b,p1,p2,playAI);*/
+    int a=displayChessBoard(b,p1,p2,playAI);
 
-    Board b;
+    /*Board b;
     b.initiateBoard();
     //cout<<"row :"<<b.getBoard().size()<<endl;
     //cout<<"column : "<<b.getBoard()[0].size()<<endl;
@@ -455,7 +455,7 @@ int main() {
 
     int a=displayChessBoard(b,p1,p2,playAI);
     cout<<"new name :"<<b.getPiecesPositions().at("b8").getNamePiece()<<endl;
-    cout<<"new name p1:"<<p1.getPlayerPiecesPositions().at("b8").getNamePiece()<<endl;
+    cout<<"new name p1:"<<p1.getPlayerPiecesPositions().at("b8").getNamePiece()<<endl;*/
 
     cout<<"a :"<<a<<endl;
    
