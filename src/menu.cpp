@@ -54,62 +54,65 @@ int main(){
     p1.initiatePlayer(b.getPiecesPositions());
     p2.initiatePlayer(b.getPiecesPositions());
 
-    int a=displayChessBoard(b,p1,p2);
+    bool playAI = askOpponentType();
+    int a=displayChessBoard(b,p1,p2,playAI);
 
     if(a==1){
         
     }
+    else{
+        //start game CLI
+        printWelcome();
+        printRules();
+        int c=chooseOpponent();
 
-    //start game
-    printWelcome();
-    printRules();
-    int c=chooseOpponent();
-
-    if(c==1){
-        int t=5;
-        cout<<"You chose to play againt a human.\n"<<endl;
-        while(t==5){
-            t=b.gameLogic(p1,p2);
-            /*if(b.isGameOver(p1,p2)){
-                b.printScore();
-            }*/           
-        }
-
-        if(t==7){
-            cout<<"Your game was successfully saved !"<<endl;
-        }
-
-        if(t==4){
-            cout<<"Error: Unexpected internal error"<<endl;
-        }
-
-        printBye();
-        return 0;
-
-    }
-    if(c==2){
-        cout<<"You chose to play againt AI.\n"<<endl;
-        int t=5;
-
-        while(t==5){
-            t=b.gameLogicAI(p1,p2);
-            if(b.isGameOver(p2)){
-                b.printScore();
+        if(c==1){
+            int t=5;
+            cout<<"You chose to play againt a human.\n"<<endl;
+            while(t==5){
+                t=b.gameLogic(p1,p2);
+                /*if(b.isGameOver(p1,p2)){
+                    b.printScore();
+                }*/           
             }
-        }
 
-        if(t==7){
-            cout<<"Your game was successfully saved !"<<endl;
-        }
+            if(t==7){
+                cout<<"Your game was successfully saved !"<<endl;
+            }
 
-        if(t==4){
-            cout<<"Error: Unexpected internal error"<<endl;
-        }
+            if(t==4){
+                cout<<"Error: Unexpected internal error"<<endl;
+            }
 
-        printBye();
-        return 0;
+            printBye();
+            return 0;
+
+        }
+        if(c==2){
+            cout<<"You chose to play againt AI.\n"<<endl;
+            int t=5;
+
+            while(t==5){
+                t=b.gameLogicAI(p1,p2);
+                if(b.isGameOver(p2)){
+                    b.printScore();
+                }
+            }
+
+            if(t==7){
+                cout<<"Your game was successfully saved !"<<endl;
+            }
+
+            if(t==4){
+                cout<<"Error: Unexpected internal error"<<endl;
+            }
+
+            printBye();
+            return 0;
+        }
     }
 
+    
     return 0;
     
 }

@@ -15,7 +15,6 @@ const int TITLE_HEIGHT = 60;
 const int WINDOW_WIDTH = TILE_SIZE * BOARD_SIZE + 2 * LABEL_MARGIN;
 const int WINDOW_HEIGHT = TILE_SIZE * BOARD_SIZE + TITLE_HEIGHT + LABEL_MARGIN;
 
-
 using namespace std;
 
 sf::Vector2f getTilePosition(int row, int col) {
@@ -107,7 +106,62 @@ bool askOpponentType() {
     return false; // default
 }
 
-int displayChessBoard(Board b, Player p1, Player p2, bool playAI){
+char promptPromotion(sf::RenderWindow& window, const map<string, sf::Sprite>& pieceSprites, const string& color) {
+    sf::RectangleShape background(sf::Vector2f(WINDOW_WIDTH, WINDOW_HEIGHT));
+    background.setFillColor(sf::Color(0, 0, 0, 150));  // semi-transparent dark overlay
+
+    sf::Font font;
+    font.loadFromFile("../resources/Font/Raleway-Light.ttf");
+
+    sf::Text message("Choose a piece to promote to:", font, 28);
+    message.setFillColor(sf::Color::White);
+    message.setPosition(WINDOW_WIDTH / 2 - message.getLocalBounds().width / 2, 100);
+
+    // Promotion options
+    vector<char> pieces = {'q', 'r', 'b', 'n'};
+    vector<sf::Sprite> options;
+
+    float startX = WINDOW_WIDTH / 2 - (pieces.size() * TILE_SIZE) / 2;
+    float y = 180;
+
+    for (int i = 0; i < pieces.size(); ++i) {
+        string name = color + pieces[i];
+        sf::Sprite option = pieceSprites.at(name);
+        option.setPosition(startX + i * TILE_SIZE + TILE_SIZE / 2, y + TILE_SIZE / 2);
+        options.push_back(option);
+    }
+
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                window.close();
+                return 'q'; // default
+            }
+            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+                int x = event.mouseButton.x;
+                int yClick = event.mouseButton.y;
+
+                for (int i = 0; i < pieces.size(); ++i) {
+                    sf::FloatRect bounds = options[i].getGlobalBounds();
+                    if (bounds.contains(x, yClick)) {
+                        return pieces[i]; // Return choice
+                    }
+                }
+            }
+        }
+
+        window.clear();
+        window.draw(background);
+        window.draw(message);
+        for (auto& s : options) window.draw(s);
+        window.display();
+    }
+
+    return 'q'; // fallback
+}
+
+int displayChessBoard(Board& b, Player& p1, Player& p2, bool playAI){
     //const int WINDOW_HEIGHT = TILE_SIZE * BOARD_SIZE + 100; // extra room
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Chess GUI with SFML");
 
@@ -211,11 +265,23 @@ int displayChessBoard(Board b, Player p1, Player p2, bool playAI){
 
                         isSelecting = false;
                         int r;
+                        
                         if(currentTurn == "white"){
                             r=b.movePieceGUI(p1,p2,selectedSquare,moveTo);
+                            if (r == 2) {
+                                char choice = promptPromotion(window, pieceSprites, "w");
+                                b.promotePawnGUI(p1, moveTo, choice);
+                                board = stateBoard(b);
+                            }
                         }
+
                         if(currentTurn == "black" && playAI==false){
                             r=b.movePieceGUI(p2,p1,selectedSquare,moveTo);
+                            if (r == 2) {
+                                char choice = promptPromotion(window, pieceSprites, "b");
+                                b.promotePawnGUI(p2, moveTo, choice);
+                                board = stateBoard(b);
+                            }
                         }
                     
                         if(r!=0){
@@ -307,7 +373,6 @@ int displayChessBoard(Board b, Player p1, Player p2, bool playAI){
             window.draw(sprite);
         }
         
-        
         window.display();
 
         // Handle AI move if needed
@@ -334,7 +399,7 @@ int main() {
 
     bool playAI = askOpponentType();  // Player chooses here
 
-    Board b;
+    /*Board b;
     b.initiateBoard();
     Player p1("white");
     Player p2("black");
@@ -342,7 +407,55 @@ int main() {
     p1.initiatePlayer(b.getPiecesPositions());
     p2.initiatePlayer(b.getPiecesPositions());
 
+    int a=displayChessBoard(b,p1,p2,playAI);*/
+
+    Board b;
+    b.initiateBoard();
+    //cout<<"row :"<<b.getBoard().size()<<endl;
+    //cout<<"column : "<<b.getBoard()[0].size()<<endl;
+    
+    Player p1("white");
+    Player p2("black");
+
+    p1.initiatePlayer(b.getPiecesPositions());
+    p2.initiatePlayer(b.getPiecesPositions());
+    
+    int t=0;
+    //b.printBoard();
+
+    b.getPiecesPositions().erase("b8");
+    p1.getPlayerPiecesPositions().erase("b8");
+    
+    //Piece captured;
+
+    cout<<"name :"<<b.getPiecesPositions().at("b2").getNamePiece()<<endl;
+    cout<<"name p1:"<<p1.getPlayerPiecesPositions().at("b2").getNamePiece()<<endl;
+
+    // Perform a move
+    Piece& p=b.getPiecesPositions()["b2"];  
+    b.getPiecesPositions().erase("b8");
+    b.getPiecesPositions().erase("b7");
+    b.getPiecesPositions().erase("b2"); 
+
+    //b.printBoard();
+
+    b.getPiecesPositions()["b7"]=p;
+    p1.getPlayerPiecesPositions()["b7"]=p;
+    p.setCasePiece("b7");
+    p.setCaseCoordinate({1, 1});
+
+    b.getPiecesPositions()["b7"] = p;
+    p1.getPlayerPiecesPositions()["b7"] = p;
+
+
+    //b.printBoard();
+
+    //cout<<"promotion ? :"<<b.getPiecesPositions().at("b8").canBePromoted()<<endl;
+    //b.promotePawnGUI(p1,"b8",'q');
+
     int a=displayChessBoard(b,p1,p2,playAI);
+    cout<<"new name :"<<b.getPiecesPositions().at("b8").getNamePiece()<<endl;
+    cout<<"new name p1:"<<p1.getPlayerPiecesPositions().at("b8").getNamePiece()<<endl;
 
     cout<<"a :"<<a<<endl;
    

@@ -50,6 +50,7 @@ class Piece{
     bool isMoveLegal(std::vector<int> coordinates);//good
     bool pawnMove(std::vector<int> coordinates);//good
     bool pawnCapture(std::vector<int> coordinates);//good
+    bool canBePromoted();
     void pawnPromotion();//good
     bool rookMove(std::vector<int> coordinates);//good
     bool knightMove(std::vector<int> coordinates);//good

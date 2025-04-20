@@ -295,6 +295,27 @@ void Piece::pawnPromotion(){
     
 }
 
+
+bool Piece::canBePromoted(){
+
+    //coordinates in C++: coordinates[0]=row,coordinates[1]=column;
+    if (namePiece=="pawn"){
+        if(colorPiece=="white"){
+            if(coordinatesOnBoard[0]==0){
+                return true;
+            }
+        }
+
+        if(colorPiece=="black"){
+            if(coordinatesOnBoard[0]==7){
+                return true;
+            }
+        }
+    }
+
+    return false;    
+}
+
 //good
 bool Piece::pawnCapture(vector<int> coordinates){
 

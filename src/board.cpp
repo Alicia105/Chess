@@ -1887,7 +1887,7 @@ vector<string> Board::findBestMove(Player aiPlayer, Player opponent, int depth,i
     return bestMove;
 }
 
-vector<vector<string>> Board::getAllLegalMoves(Player currentPlayer, Player adverser) {
+vector<vector<string>> Board::getAllLegalMoves(Player& currentPlayer, Player& adverser) {
     string colorPlayer = currentPlayer.getColorPlayer();
     vector<vector<string>> allMoves;
 
@@ -2182,6 +2182,9 @@ int Board::movePieceGUI(Player& currentPlayer, Player& adverser,string selectedS
     string colorPlayer=currentPlayer.getColorPlayer();
     cout<<"2"<<endl;
     vector<vector<string>> moves =getAllLegalMoves(currentPlayer, adverser);
+    for(auto m:moves){
+        cout<<"start :"<<m[0]<<" , "<<"end : "<<m[1]<<endl;
+    }
     cout<<"3"<<endl;
 
 
@@ -2196,21 +2199,21 @@ int Board::movePieceGUI(Player& currentPlayer, Player& adverser,string selectedS
     if (!piecesPositions.count(selectedSquare)) {
         cout<<"5"<<endl;
         cout << "[ERROR] No piece at source square " << selectedSquare << endl;
-        return 2;
+        return 1;
     }
 
     // Move opponent's piece 
     if (piecesPositions.count(selectedSquare) && piecesPositions.at(selectedSquare).getColorPiece()!=colorPlayer){
         cout<<"6"<<endl;
         cout << "[ERROR] Opponent's piece : you can't move it"<< endl;
-        return 3;              
+        return 1;              
     }
 
     // Move to a piece occupied by player's piece 
     if (piecesPositions.count(moveTo) && piecesPositions.at(moveTo).getColorPiece()==colorPlayer){
         cout<<"7"<<endl;
         cout << "[ERROR] Square occupied by your piece : you can't move your square to your piece"<< endl;
-        return 4;              
+        return 1;              
     }
 
     cout<<"8"<<endl;
@@ -2232,7 +2235,7 @@ int Board::movePieceGUI(Player& currentPlayer, Player& adverser,string selectedS
                 }
                 cout<<"13"<<endl;            
                 Piece& p=piecesPositions.at(selectedSquare);
-                vector<int> endCoord=generateCaseCoordinates(selectedSquare);
+                vector<int> endCoord=generateCaseCoordinates(moveTo);
             
                 p.setCaseCoordinate(endCoord);
                 p.setCasePiece(moveTo);
@@ -2244,19 +2247,52 @@ int Board::movePieceGUI(Player& currentPlayer, Player& adverser,string selectedS
             
                 currentPlayer.getPlayerPiecesPositions()[moveTo] = p;
                 currentPlayer.getPlayerPiecesPositions().erase(selectedSquare);
-            
                 
                 currentPlayer.playedAMove();
+                cout<<"promotion ? :"<<currentPlayer.getPlayerPiecesPositions().at(moveTo).canBePromoted()<<endl;
+                cout<<"promotion in board ? :"<<piecesPositions.at(moveTo).canBePromoted()<<endl;
+                if(currentPlayer.getPlayerPiecesPositions().at(moveTo).canBePromoted()){
+                    
+                    return 2;
+                }
                 return 0;
             }
 
         }
     }
 
-    return 5;
+    return 1;
 
 }
 
+void Board::promotePawnGUI(Player& p, string position, char type){
+    string name;
+
+    switch(type){
+        case 'r':
+            name="rook";
+            break;
+        case 'k':
+            name="knight";
+            break;
+        case 'b':
+            name="bishop";
+            break;
+        case 'q':
+            name="queen";
+            break;
+    }
+
+    if(piecesPositions.count(position) && p.getPlayerPiecesPositions().count(position)){
+        Piece & pi= piecesPositions.at(position);
+        pi.setNamePiece(name);
+        piecesPositions[position]=pi;
+
+        Piece & pl= p.getPlayerPiecesPositions().at(position);
+        pl.setNamePiece(name);
+        p.getPlayerPiecesPositions()[position]=pl;
+    }
+}
 
 /*int main(){
 
@@ -2273,18 +2309,34 @@ int Board::movePieceGUI(Player& currentPlayer, Player& adverser,string selectedS
     
     int t=0;
     b.printBoard();
-    
-    /*for(int i=0; i<5; i++){
-        t=b.playerTurn(p1,p2);
-        t=b.playerTurnAI(p2,p1);
-    }
 
-    //t=b.movePieceGUI(p1,p2,"a2","a4");
+    b.getPiecesPositions().erase("b8");
+    p1.getPlayerPiecesPositions().erase("b8");
+    
+    //Piece captured;
+
+    cout<<"name :"<<b.getPiecesPositions().at("b2").getNamePiece()<<endl;
+    cout<<"name p1:"<<p1.getPlayerPiecesPositions().at("b2").getNamePiece()<<endl;
+
+    // Perform a move
+    Piece& p=b.getPiecesPositions()["b2"];  
+    b.getPiecesPositions().erase("b8");
+    b.getPiecesPositions().erase("b2"); 
 
     b.printBoard();
-    return t;    
-}*/
 
+    b.getPiecesPositions()["b8"]=p;
+    p1.getPlayerPiecesPositions()["b8"]=p;
+
+    b.printBoard();
+
+    cout<<"promotion ? :"<<b.getPiecesPositions().at("b8").canBePromoted()<<endl;
+    b.promotePawnGUI(p1,"b8",'q');
+    cout<<"new name :"<<b.getPiecesPositions().at("b8").getNamePiece()<<endl;
+    cout<<"new name p1:"<<p1.getPlayerPiecesPositions().at("b8").getNamePiece()<<endl;
+    return t;    
+}
+*/
 /*int main() {
     Board b;
     b.initiateBoard();
