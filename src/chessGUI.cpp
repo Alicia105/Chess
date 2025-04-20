@@ -161,6 +161,132 @@ char promptPromotion(sf::RenderWindow& window, const map<string, sf::Sprite>& pi
     return 'q'; // fallback
 }
 
+int showStaleMate(){
+    const int WIDTH = 600, HEIGHT = 400;
+    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Game Over");
+
+    sf::Font font;
+    if (!font.loadFromFile("../resources/Font/Raleway-Light.ttf")) {
+        cerr << "Failed to load font!" << endl;
+        return false;
+    }
+
+    sf::Text title("Game Over ! : Stalemate, it's a draw ", font, 36);
+    title.setPosition(100, 40);
+    title.setFillColor(sf::Color::Red);
+
+    sf::RectangleShape restartBtn(sf::Vector2f(200, 60));
+    restartBtn.setPosition(100, 150);
+    restartBtn.setFillColor(sf::Color(100, 200, 100));
+
+    sf::Text restartText("Restart", font, 24);
+    restartText.setPosition(120, 165);
+    restartText.setFillColor(sf::Color::Black);
+
+    sf::RectangleShape quitBtn(sf::Vector2f(200, 60));
+    quitBtn.setPosition(100, 250);
+    quitBtn.setFillColor(sf::Color(200, 100, 100));
+
+    sf::Text quitText("Exit", font, 24);
+    quitText.setPosition(140, 265);
+    quitText.setFillColor(sf::Color::Black);
+
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed)
+                window.close();
+
+            if (event.type == sf::Event::MouseButtonPressed) {
+                auto mouseX = event.mouseButton.x;
+                auto mouseY = event.mouseButton.y;
+
+                if (restartBtn.getGlobalBounds().contains(mouseX, mouseY)) {
+                    window.close();
+                    return 2; //restart
+                }
+                if (quitBtn.getGlobalBounds().contains(mouseX, mouseY)) {
+                    window.close();
+                    return 1; //quit
+                }
+            }
+        }
+
+        window.clear(sf::Color(30, 30, 30));
+        window.draw(title);
+        window.draw(restartBtn);
+        window.draw(restartText);
+        window.draw(quitBtn);
+        window.draw(quitText);
+        window.display();
+    }
+
+    return 2; // default
+}
+
+int showCheckMate(){
+    const int WIDTH = 600, HEIGHT = 400;
+    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Game Over");
+
+    sf::Font font;
+    if (!font.loadFromFile("../resources/Font/Raleway-Light.ttf")) {
+        cerr << "Failed to load font!" << endl;
+        return false;
+    }
+
+    sf::Text title("Game Over ! : You're checkmate  ", font, 36);
+    title.setPosition(100, 40);
+    title.setFillColor(sf::Color::Red);
+
+    sf::RectangleShape restartBtn(sf::Vector2f(200, 60));
+    restartBtn.setPosition(100, 150);
+    restartBtn.setFillColor(sf::Color(100, 200, 100));
+
+    sf::Text restartText("Restart", font, 24);
+    restartText.setPosition(120, 165);
+    restartText.setFillColor(sf::Color::Black);
+
+    sf::RectangleShape quitBtn(sf::Vector2f(200, 60));
+    quitBtn.setPosition(100, 250);
+    quitBtn.setFillColor(sf::Color(200, 100, 100));
+
+    sf::Text quitText("Exit", font, 24);
+    quitText.setPosition(140, 265);
+    quitText.setFillColor(sf::Color::Black);
+
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed)
+                window.close();
+
+            if (event.type == sf::Event::MouseButtonPressed) {
+                auto mouseX = event.mouseButton.x;
+                auto mouseY = event.mouseButton.y;
+
+                if (restartBtn.getGlobalBounds().contains(mouseX, mouseY)) {
+                    window.close();
+                    return 2; //restart
+                }
+                if (quitBtn.getGlobalBounds().contains(mouseX, mouseY)) {
+                    window.close();
+                    return 1; //quit
+                }
+            }
+        }
+
+        window.clear(sf::Color(30, 30, 30));
+        window.draw(title);
+        window.draw(restartBtn);
+        window.draw(restartText);
+        window.draw(quitBtn);
+        window.draw(quitText);
+        window.display();
+    }
+
+    return 2; // default
+}
+
 int displayChessBoard(Board& b, Player& p1, Player& p2, bool playAI){
     //const int WINDOW_HEIGHT = TILE_SIZE * BOARD_SIZE + 100; // extra room
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Chess GUI with SFML");
@@ -265,6 +391,7 @@ int displayChessBoard(Board& b, Player& p1, Player& p2, bool playAI){
 
                         isSelecting = false;
                         int r;
+                        int t;
                         
                         if(currentTurn == "white"){
                             r=b.movePieceGUI(p1,p2,selectedSquare,moveTo);
@@ -272,6 +399,15 @@ int displayChessBoard(Board& b, Player& p1, Player& p2, bool playAI){
                                 char choice = promptPromotion(window, pieceSprites, "w");
                                 b.promotePawnGUI(p1, moveTo, choice);
                                 board = stateBoard(b);
+                            }
+                            if(r==3){
+                                t=showCheckMate();
+                                return t;
+
+                            }
+                            if(r==4){
+                                t=showStaleMate();
+                                return t;
                             }
                         }
 
@@ -281,6 +417,15 @@ int displayChessBoard(Board& b, Player& p1, Player& p2, bool playAI){
                                 char choice = promptPromotion(window, pieceSprites, "b");
                                 b.promotePawnGUI(p2, moveTo, choice);
                                 board = stateBoard(b);
+                            }
+                            if(r==3){
+                                t=showCheckMate();
+                                return t;
+
+                            }
+                            if(r==4){
+                                t=showStaleMate();
+                                return t;
                             }
                         }
                     
@@ -395,7 +540,23 @@ int displayChessBoard(Board& b, Player& p1, Player& p2, bool playAI){
 
 }
 
-int main() {
+int fullGUI(){
+
+    bool playAI = askOpponentType();  // Player chooses here
+
+    Board b;
+    b.initiateBoard();
+    Player p1("white");
+    Player p2("black");
+
+    p1.initiatePlayer(b.getPiecesPositions());
+    p2.initiatePlayer(b.getPiecesPositions());
+
+    int a=displayChessBoard(b,p1,p2,playAI);
+    return a;
+}
+
+/*int main() {
 
     bool playAI = askOpponentType();  // Player chooses here
 
@@ -455,8 +616,8 @@ int main() {
 
     int a=displayChessBoard(b,p1,p2,playAI);
     cout<<"new name :"<<b.getPiecesPositions().at("b8").getNamePiece()<<endl;
-    cout<<"new name p1:"<<p1.getPlayerPiecesPositions().at("b8").getNamePiece()<<endl;*/
+    cout<<"new name p1:"<<p1.getPlayerPiecesPositions().at("b8").getNamePiece()<<endl;
 
     cout<<"a :"<<a<<endl;
    
-}
+}*/

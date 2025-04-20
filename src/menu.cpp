@@ -36,6 +36,20 @@ int chooseOpponent(){
     return x;
 } 
 
+int chooseCLI(){
+    int x;
+    cout<<"Do you want to play using Command Line Interface (CLI) ?"<<endl;
+    cout<<"1.Yes 2.No"<<endl;
+    cin>>x;
+   
+    while(x!=1 && x!=2){
+        cout<<"Please enter a valid option (1 or 2):"<<endl;
+        cin>>x;
+    }
+    cin.ignore();
+    return x;
+} 
+
 void printBye(){
     cout<<"Thank you for playing our chess game !"<<endl;
     cout<<"=========================== BYE ===========================\n"<<endl;
@@ -55,10 +69,18 @@ int main(){
     p2.initiatePlayer(b.getPiecesPositions());
 
     bool playAI = askOpponentType();
-    int a=displayChessBoard(b,p1,p2,playAI);
+    int a=0;
 
-    if(a==1){
-        
+    while(a==0){
+        a=fullGUI();
+    }
+
+    //message to choose CLI
+    a=chooseCLI();
+
+    if(a==2){
+        printBye();
+        return 0;        
     }
     else{
         //start game CLI
@@ -111,7 +133,6 @@ int main(){
             return 0;
         }
     }
-
     
     return 0;
     

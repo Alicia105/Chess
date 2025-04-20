@@ -2217,6 +2217,22 @@ int Board::movePieceGUI(Player& currentPlayer, Player& adverser,string selectedS
     }
 
     cout<<"8"<<endl;
+    if(isCastlingPossible(currentPlayer)){
+        bool isWhite = (colorPlayer == "white");
+        bool isKingSideCastle = selectedSquare == (isWhite ? "e1" : "e8") && moveTo == (isWhite ? "g1" : "g8");
+        bool isQueenSideCastle = selectedSquare == (isWhite ? "e1" : "e8") && moveTo == (isWhite ? "c1" : "c8");
+        if(isKingSideCastle){
+            doKingsideCastling(currentPlayer);
+            currentPlayer.playedAMove();
+            return 0;
+        }
+        if(isQueenSideCastle){
+            doQueensideCastling(currentPlayer);
+            currentPlayer.playedAMove();
+            return 0;
+        }
+    }
+
     for(auto m: moves){
         cout<<"9"<<endl;
         if(m.size()==2){
@@ -2226,7 +2242,7 @@ int Board::movePieceGUI(Player& currentPlayer, Player& adverser,string selectedS
 
                 Piece& p=piecesPositions.at(selectedSquare);
                 vector<int> endCoord=generateCaseCoordinates(moveTo);
-                
+
                 if(isEnPassant(currentPlayer,adverser,selectedSquare,moveTo)){
                     cout<<"12"<<endl;
                     int dir = (colorPlayer == "white") ? 1 : -1;
@@ -2275,6 +2291,13 @@ int Board::movePieceGUI(Player& currentPlayer, Player& adverser,string selectedS
                 if(currentPlayer.getPlayerPiecesPositions().at(moveTo).canBePromoted()){
                     cout<<"15"<<endl;                    
                     return 2;
+                }
+                if(isCheckMate(currentPlayer)){
+                    return 3;
+                }
+                
+                if (isStaleMate(currentPlayer)) {
+                    return 4;       
                 }
                 return 0;
             }
