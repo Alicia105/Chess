@@ -2223,8 +2223,29 @@ int Board::movePieceGUI(Player& currentPlayer, Player& adverser,string selectedS
             cout<<"10"<<endl;
             if(m[0]==selectedSquare && m[1]==moveTo){
                 cout<<"11"<<endl;
-                if (piecesPositions.count(moveTo) && piecesPositions.at(moveTo).getColorPiece() == adverser.getColorPlayer()) {
+
+                Piece& p=piecesPositions.at(selectedSquare);
+                vector<int> endCoord=generateCaseCoordinates(moveTo);
+                
+                if(isEnPassant(currentPlayer,adverser,selectedSquare,moveTo)){
                     cout<<"12"<<endl;
+                    int dir = (colorPlayer == "white") ? 1 : -1;
+                    vector<int>pawnCoord = {endCoord[0]+dir, endCoord[1]};
+                    string endPos = generateNameCase(pawnCoord);
+                
+                    // Capture the piece
+                    if (piecesPositions.count(endPos)) {
+                        Piece& adverserPiece = piecesPositions.at(endPos);
+                        adverserPiece.setIsCaptured(true);
+                        adverserPiece.setLastMove(endPos);
+                        currentPlayer.getCapturedPieces().push_back(adverserPiece);
+                        adverser.getPlayerPiecesPositions().erase(endPos);
+                        piecesPositions.erase(endPos);  // <<== don't forget this!
+                    }
+                }
+
+                if (piecesPositions.count(moveTo) && piecesPositions.at(moveTo).getColorPiece() == adverser.getColorPlayer()) {
+                    cout<<"13"<<endl;
                     // Capture the piece
                     Piece& adverserPiece = piecesPositions.at(moveTo);
                     adverserPiece.setIsCaptured(true);
@@ -2233,10 +2254,8 @@ int Board::movePieceGUI(Player& currentPlayer, Player& adverser,string selectedS
                     adverser.getPlayerPiecesPositions().erase(moveTo);
             
                 }
-                cout<<"13"<<endl;            
-                Piece& p=piecesPositions.at(selectedSquare);
-                vector<int> endCoord=generateCaseCoordinates(moveTo);
-            
+                cout<<"14"<<endl;            
+                           
                 p.setCaseCoordinate(endCoord);
                 p.setCasePiece(moveTo);
                 p.setLastMove(selectedSquare);
@@ -2250,30 +2269,11 @@ int Board::movePieceGUI(Player& currentPlayer, Player& adverser,string selectedS
                 
                 currentPlayer.playedAMove();
 
-                if(isEnPassant(currentPlayer,adverser,selectedSquare,moveTo)){
-                    cout<<"14"<<endl;
-                    int dir;
-                    if(colorPlayer=="white"){
-                        dir=1;
-                    }
-                    if(colorPlayer=="black"){
-                        dir=-1;
-                    }
-                    vector<int>pawnCoord={p.getCaseCoordinate()[0]+dir,p.getCaseCoordinate()[1]};
-                    string endPos=generateNameCase(pawnCoord);
-                    // Capture the piece
-                    Piece& adverserPiece = piecesPositions.at(endPos);
-                    adverserPiece.setIsCaptured(true);
-                    adverserPiece.setLastMove(endPos);
-                    currentPlayer.getCapturedPieces().push_back(adverserPiece);
-                    adverser.getPlayerPiecesPositions().erase(endPos);            
-
-                }
-
+                
                 cout<<"promotion ? :"<<currentPlayer.getPlayerPiecesPositions().at(moveTo).canBePromoted()<<endl;
                 cout<<"promotion in board ? :"<<piecesPositions.at(moveTo).canBePromoted()<<endl;
                 if(currentPlayer.getPlayerPiecesPositions().at(moveTo).canBePromoted()){
-                    
+                    cout<<"15"<<endl;                    
                     return 2;
                 }
                 return 0;
