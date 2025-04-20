@@ -9,71 +9,98 @@ const int TILE_SIZE = 100;
 const int BOARD_SIZE = 8;
 const int WINDOW_SIZE = TILE_SIZE * BOARD_SIZE;
 
+using namespace std;
+
 sf::Vector2f getTilePosition(int row, int col) {
     return sf::Vector2f(col * TILE_SIZE, row * TILE_SIZE);
 }
 
-std::map<std::string, std::string> stateBoard(Board b){
+map<string, string> stateBoard(Board b){
     
+    map<string, string> board;
     for(int i=0; i<b.getBoard().size();i++){
         for(int j=0; j<b.getBoard()[0].size();j++){
-            std::string position=b.getBoard()[i][j];
+            string position=b.getBoard()[i][j];
             if(!b.getPiecesPositions().count(position)) continue;
-            std::string n=b.getPiecesPositions().at(position).getNamePiece();
-            std::string c=b.getPiecesPositions().at(position).getColorPiece();
+            string n=b.getPiecesPositions().at(position).getNamePiece();
+            string c=b.getPiecesPositions().at(position).getColorPiece();
             if(n=="knight"){
-                std::string id=c.substr(0,1)+"n";
+                string id=c.substr(0,1)+"n";
                 board[position]=id;
             }
             else{
-                std::string id=c.substr(0,1)+n.substr(0,1);
+                string id=c.substr(0,1)+n.substr(0,1);
                 board[position]=id;
             }
         }
     }
-
+    return board;
 }
 
 int displayChessBoard(Board b, Player p1, Player p2){
-    sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE, WINDOW_SIZE), "Chess GUI with SFML");
+    const int WINDOW_HEIGHT = TILE_SIZE * BOARD_SIZE + 100; // extra room
+    sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE, WINDOW_HEIGHT), "Chess GUI with SFML");
+    //sf::RenderWindow window(sf::VideoMode({WINDOW_SIZE, WINDOW_SIZE}), "Chess GUI with SFML");
     window.setFramerateLimit(60);
 
     sf::Color lightSquare(240, 217, 181);
     sf::Color darkSquare(181, 136, 99);
 
-    std::map<std::string, sf::Texture> pieceTextures;
-    std::map<std::string, sf::Sprite> pieceSprites;
+    map<string, sf::Texture> pieceTextures;
+    map<string, sf::Sprite> pieceSprites;
+    // Sprite storage with unique_ptr
+    //map<string, unique_ptr<sf::Sprite>> pieceSprites;
 
-    std::string pieces[] = {
+    string pieces[] = {
         "wp", "wr", "wn", "wb", "wq", "wk",
         "bp", "br", "bn", "bb", "bq", "bk"
     };
 
     for (const auto& name : pieces) {
         sf::Texture texture;
-        if (!texture.loadFromFile("../images/chessIcons/" + name + ".png")) {
-            std::cerr << "Failed to load " << name << ".png" << std::endl;
+        sf::Sprite sprite;
+        
+        if (!texture.loadFromFile("../resources/images/chessIcons/" + name + ".png")) {
+            cerr << "Failed to load " << name << ".png" << endl;
             continue;
         }
         pieceTextures[name] = texture;
+        //sf::Sprite sprite(texture);
+        //pieceSprites[name]=sprite;
         pieceSprites[name].setTexture(pieceTextures[name]);
+
+        // Create sprite and store in map
+        //auto sprite = make_unique<sf::Sprite>(pieceTextures[name]);
+        //pieceSprites[name] = std::move(sprite);
     }
 
     // Initial positions
-    std::map<std::string, std::string> board=stateBoard(b);
+    map<string, string> board=stateBoard(b);
+
+    sf::Font font;
+    if (!font.loadFromFile("../resources/Font/Raleway-Light.ttf")) {
+        cerr << "Failed to load font!" << endl;
+        return -1;
+    }
         
-    auto getBoardCoords = [](const std::string& pos) {
+    auto getBoardCoords = [](const string& pos) {
         int col = pos[0] - 'a';
         int row = 8 - (pos[1] - '0');
-        //std::vector<int> coords = b.generateCaseCoordinates(pos);
-        return std::make_pair(row, col);
+        //vector<int> coords = b.generateCaseCoordinates(pos);
+        return make_pair(row, col);
     };
 
     
-    std::string selectedSquare = "";
+    string selectedSquare = "";
     bool isSelecting = false;
 
+    sf::Text title("Chess AI", font, 32);
+    title.setFillColor(sf::Color::White);
+    title.setPosition(WINDOW_SIZE / 2 - title.getLocalBounds().width / 2, 10);
+        
+
     while (window.isOpen()) {
+
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed){
@@ -90,24 +117,24 @@ int displayChessBoard(Board b, Player p1, Player p2){
                     int row = y / squareSize;
     
                     // Flip Y-axis if needed
-                    std::string clickedSquare = b.generateNameCase({row, col});
+                    string clickedSquare = b.generateNameCase({row, col});
     
                     if (!isSelecting) {
                         selectedSquare = clickedSquare;
                         isSelecting = true;
-                        std::cout << "Selected from: " << selectedSquare << std::endl;
+                        cout << "Selected from: " << selectedSquare << endl;
                     } else {
-                        std::string moveTo = clickedSquare;
+                        string moveTo = clickedSquare;
                         isSelecting = false;
-                        std::cout << "Trying move: " << selectedSquare << " -> " << moveTo << std::endl;
+                        cout << "Trying move: " << selectedSquare << " -> " << moveTo << endl;
     
                         // Call your move logic here
                         if (b.makeMove(selectedSquare, moveTo)) {
-                            std::cout << "Move made!" << std::endl;
+                            cout << "Move made!" << endl;
                             //update board for drawing
                             board=stateBoard(b);
                         } else {
-                            std::cout << "Illegal move!" << std::endl;
+                            cout << "Illegal move!" << endl;
                         }
                     }
                 }
@@ -117,22 +144,69 @@ int displayChessBoard(Board b, Player p1, Player p2){
 
         window.clear();
 
-        // Draw board
+        // Draw title
+        window.draw(title);
+
+        // Offset board down to leave room for title
+        int boardOffsetY = 50;  // Space for title
+
+        // Draw board with labels
         for (int row = 0; row < BOARD_SIZE; ++row) {
+            for (int col = 0; col < BOARD_SIZE; ++col) {
+                sf::RectangleShape tile(sf::Vector2f(TILE_SIZE, TILE_SIZE));
+                tile.setPosition(col * TILE_SIZE, boardOffsetY + row * TILE_SIZE);
+                tile.setFillColor((row + col) % 2 == 0 ? lightSquare : darkSquare);
+                window.draw(tile);
+            }
+        }
+
+        // Draw board
+        /*for (int row = 0; row < BOARD_SIZE; ++row) {
             for (int col = 0; col < BOARD_SIZE; ++col) {
                 sf::RectangleShape tile(sf::Vector2f(TILE_SIZE, TILE_SIZE));
                 tile.setPosition(getTilePosition(row, col));
                 tile.setFillColor((row + col) % 2 == 0 ? lightSquare : darkSquare);
                 window.draw(tile);
             }
+        }*/
+
+        // Draw labels
+        for (int i = 0; i < BOARD_SIZE; ++i) {
+            // Column labels (a–h)
+            sf::Text colLabel;
+            colLabel.setFont(font);
+            colLabel.setCharacterSize(18);
+            colLabel.setFillColor(sf::Color::Black);
+            colLabel.setString(static_cast<char>('a' + i));
+            colLabel.setPosition(i * TILE_SIZE + TILE_SIZE / 2 - 5, boardOffsetY + BOARD_SIZE * TILE_SIZE + 5);
+            window.draw(colLabel);
+
+            // Row labels (8–1)
+            sf::Text rowLabel;
+            rowLabel.setFont(font);
+            rowLabel.setCharacterSize(18);
+            rowLabel.setFillColor(sf::Color::Black);
+            rowLabel.setString(std::to_string(8 - i));
+            rowLabel.setPosition(5, boardOffsetY + i * TILE_SIZE + TILE_SIZE / 2 - 10);
+            window.draw(rowLabel);
         }
+
+        // Draw pieces
+        /*for (const auto& entry : board ) {
+            auto [row, col] = getBoardCoords(entry.first);
+            string pieceName = entry.second;
+            sf::Sprite& sprite = pieceSprites[pieceName];
+            sprite.setPosition(getTilePosition(row, col));
+            window.draw(sprite);
+        }*/
 
         // Draw pieces
         for (const auto& entry : board ) {
             auto [row, col] = getBoardCoords(entry.first);
             std::string pieceName = entry.second;
             sf::Sprite& sprite = pieceSprites[pieceName];
-            sprite.setPosition(getTilePosition(row, col));
+            //sprite.setPosition(getTilePosition(row, col));
+            sprite.setPosition(col * TILE_SIZE, boardOffsetY + row * TILE_SIZE);
             window.draw(sprite);
         }
         
@@ -144,7 +218,16 @@ int displayChessBoard(Board b, Player p1, Player p2){
 }
 
 int main() {
+    Board b;
+    b.initiateBoard();
+    Player p1("white");
+    Player p2("black");
+
+    p1.initiatePlayer(b.getPiecesPositions());
+    p2.initiatePlayer(b.getPiecesPositions());
+
     int a=displayChessBoard(b,p1,p2);
+
     cout<<"a :"<<a<<endl;
    
 }
