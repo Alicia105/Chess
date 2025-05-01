@@ -34,3 +34,4 @@ src/sfml-system-2.dll
 src/sfml-system-d-2.dll
 src/sfml-window-2.dll
 src/sfml-window-d-2.dll
+src/*.dll
