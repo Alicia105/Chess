@@ -1,5 +1,5 @@
-#ifndef DEF_MENU
-#define DEF_MENU
+#ifndef MENU_HPP
+#define MENU_HPP
 
 #include <iostream>
 #include "board.hpp"

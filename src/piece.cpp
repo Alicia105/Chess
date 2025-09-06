@@ -14,7 +14,11 @@ Piece::Piece(){
     isPromoted=false;
     coordinatesOnBoard=vector<int>(2);
     numberOfMove=0;
+    lastMove="";
+    
 }
+
+//create a full constructor
 
 //good
 Piece::~Piece(){}

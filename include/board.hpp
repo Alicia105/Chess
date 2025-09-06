@@ -1,5 +1,5 @@
-#ifndef DEF_BOARD
-#define DEF_BOARD
+#ifndef BOARD_HPP
+#define BOARD_HPP
 
 #include <iostream>
 #include <vector>

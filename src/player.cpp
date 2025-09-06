@@ -22,6 +22,8 @@ Player::Player(string colorplayer){
     numberOfMove=0;
 }
 
+//create a full constructor
+
 //good
 Player::~Player(){}
 
@@ -51,7 +53,7 @@ int Player::getNumberOfMove(){
 //setters
 
 //recheck--> need for a copy constructor
-void Player::initiatePlayer(std::map<std::string,Piece> allPiecesPositionsOnBoard){
+void Player::initiatePlayer(map<string,Piece> allPiecesPositionsOnBoard){
     for(auto piece : allPiecesPositionsOnBoard){
         //cout << "Checking piece at: " << piece.first << endl;
         if(piece.second.getColorPiece()==colorPlayer){

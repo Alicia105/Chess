@@ -1,5 +1,5 @@
-#ifndef DEF_PIECE
-#define DEF_PIECE
+#ifndef PIECE_HPP
+#define PIECE_HPP
 
 #include <iostream>
 #include <string>
@@ -8,14 +8,14 @@
 class Piece{
 
     private:
-    std::string namePiece;
-    std::string colorPiece;
-    std::string casePiece;//caseNameInChess nomenclature
-    std::vector<int> coordinatesOnBoard;
-    int numberOfMove;
-    bool isCaptured;
-    bool isPromoted;
-    std::string lastMove;
+    std::string namePiece; //name of the chess piece
+    std::string colorPiece; //color of the chess piece
+    std::string casePiece; //case name in Chess nomenclature (traditional coordinates (ex: a1)
+    std::vector<int> coordinatesOnBoard; //coordinates on the board with numbers from 0 to 7 (ex: (0,7)= "a1")
+    int numberOfMove; //number of times this piece was moved
+    bool isCaptured; //flag to know if this piece has been captured
+    bool isPromoted; //flag to know if this piece has been promoted (used only for pawns)
+    std::string lastMove; //case name of the last position of this piece
 
     public:
     Piece();//good
@@ -31,6 +31,7 @@ class Piece{
     bool getIsCaptured();//good
     std::string getLastMove();
     bool getIsPromoted();
+    
 
     //setters
 

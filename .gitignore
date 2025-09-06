@@ -1,4 +1,7 @@
 .vscode
 build/
+googletest-1.17.0/
 src/*.exe
 app.py
+tests/catch_*
+tests/test_board.cpp

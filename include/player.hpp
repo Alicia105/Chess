@@ -1,5 +1,5 @@
-#ifndef DEF_PLAYER
-#define DEF_PLAYER
+#ifndef PLAYER_HPP
+#define PLAYER_HPP
 
 #include <iostream>
 #include <vector>

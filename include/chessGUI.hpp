@@ -1,5 +1,5 @@
-#ifndef DEF_CHESSGUI
-#define DEF_CHESSGUI
+#ifndef CHESSGUI_HPP
+#define CHESSGUI_HPP
 
 #include <SFML/Graphics.hpp>
 #include <map>
