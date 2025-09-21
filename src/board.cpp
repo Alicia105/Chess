@@ -1596,7 +1596,7 @@ int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizin
         int eval= evaluate(aiPlayer, opponent);
         cout << "Base case reached with evaluation: " << eval << endl;
         return eval;
-    }*///->pb with isGameOver
+    }///->pb with isGameOver*/
     cout<<"Allons"<<endl;
 
     if (isMaximizingPlayer) {
@@ -1799,6 +1799,7 @@ int Board::minimax(Player aiPlayer, Player opponent, int depth, bool isMaximizin
         return minEval;
     }
 }
+
 
 vector<string> Board::findBestMove(Player aiPlayer, Player opponent, int depth,int alpha, int beta){
 //vector<string> Board::findBestMove(Player aiPlayer, Player opponent, int depth) {

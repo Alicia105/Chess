@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch_amalgamated.hpp"
 #include "../include/player.hpp"
+#include "../include/board.hpp"
 
 using namespace std;
 
@@ -27,7 +28,7 @@ TEST_CASE("Player constructor with color parameter", "[player]") {
 
 
 // Player setters
-TEST_CASE("Player color setter", "[player]") {
+TEST_CASE("Player's color", "[player]") {
     Player p;
 
     REQUIRE(p.getColorPlayer() == "");
@@ -37,7 +38,7 @@ TEST_CASE("Player color setter", "[player]") {
     REQUIRE(p.getColorPlayer() == "w");
 }
 
-TEST_CASE("Player's captured pieces setter", "[player]") {
+TEST_CASE("Player's captured pieces", "[player]") {
     Player p;
     Piece a;
 
@@ -48,7 +49,7 @@ TEST_CASE("Player's captured pieces setter", "[player]") {
 
 }
 
-TEST_CASE("Player's number of move setter", "[player]") {
+TEST_CASE("Player's number of move", "[player]") {
     Player p;
     
     REQUIRE(p.getNumberOfMove() == 0);
@@ -59,8 +60,36 @@ TEST_CASE("Player's number of move setter", "[player]") {
     REQUIRE(p.getNumberOfMove() == 5);
 }
 
-//test initiatePlayer
-
-//test getCapturedPieces
 
 //test getPlayerPiecesPositions
+TEST_CASE("Player's pieces getter", "[player]") {
+    Player p;
+    Piece a;
+    
+    REQUIRE(p.getPlayerPiecesPositions().empty());
+    p.getPlayerPiecesPositions().insert(pair<string,Piece>("a1",a));
+    REQUIRE_FALSE(p.getPlayerPiecesPositions().empty());
+    REQUIRE(p.getPlayerPiecesPositions().size()==1);
+
+}
+
+//test initiatePlayer
+TEST_CASE("Initiate white player from board","[player]"){
+    Board b;
+    b.initiateBoard();
+    Player p1("white");
+    p1.initiatePlayer(b.getPiecesPositions());
+    REQUIRE(p1.getColorPlayer() == "white");
+    REQUIRE_FALSE(p1.getPlayerPiecesPositions().empty());
+    REQUIRE(p1.getPlayerPiecesPositions().size()==16);
+}
+
+TEST_CASE("Initiate black player from board","[player]"){
+    Board b;
+    b.initiateBoard();
+    Player p1("black");
+    p1.initiatePlayer(b.getPiecesPositions());
+    REQUIRE(p1.getColorPlayer() == "black");
+    REQUIRE_FALSE(p1.getPlayerPiecesPositions().empty());
+    REQUIRE(p1.getPlayerPiecesPositions().size()==16);
+}

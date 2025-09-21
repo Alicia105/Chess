@@ -46,6 +46,18 @@ TEST_CASE("Piece case name setter", "[piece]") {
     REQUIRE(p.getCasePiece() == "a1");
 }
 
+TEST_CASE("Piece case coordinates", "[piece]") {
+    Piece p;
+    vector<int> coord = {1,1};
+
+    REQUIRE(p.getCaseCoordinate().empty());
+    p.setCaseCoordinate(coord);
+    REQUIRE_FALSE(p.getCaseCoordinate().empty());
+    REQUIRE(p.getCaseCoordinate() == coord);
+
+}
+
+//Move update
 TEST_CASE("Piece move updates state", "[piece]") {
     Piece p;
     
